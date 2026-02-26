@@ -128,5 +128,5 @@
       ]
     }
   ],
-  "defaultDefaultClientScopes": ["tenant-claims"]
+  "defaultDefaultClientScopes": ["openid", "profile", "email", "tenant-claims"]
 }
