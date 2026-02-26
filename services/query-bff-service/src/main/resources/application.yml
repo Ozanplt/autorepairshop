@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: query-bff-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9080/realms/autorepairshop}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:9080/realms/autorepairshop/protocol/openid-connect/certs}
+server:
+  port: 8091
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+services:
+  customer: ${CUSTOMER_SERVICE_URL:http://localhost:8082}
+  vehicle: ${VEHICLE_SERVICE_URL:http://localhost:8083}
+  workorder: ${WORKORDER_SERVICE_URL:http://localhost:8084}
+  payment: ${PAYMENT_SERVICE_URL:http://localhost:8086}

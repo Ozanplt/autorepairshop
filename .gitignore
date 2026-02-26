@@ -1,0 +1,15 @@
+target/
+.idea/
+*.iml
+.vscode/
+.DS_Store
+node_modules/
+dist/
+*.log
+.env
+.env.local
+.env.production
+*.key
+*.pem
+secrets/
+repair/

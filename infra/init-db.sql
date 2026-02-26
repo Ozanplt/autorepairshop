@@ -1,0 +1,11 @@
+CREATE DATABASE tenantadmin_db;
+CREATE DATABASE customer_db;
+CREATE DATABASE vehicle_db;
+CREATE DATABASE workorder_db;
+CREATE DATABASE inventory_db;
+CREATE DATABASE payment_db;
+CREATE DATABASE appointment_db;
+CREATE DATABASE file_db;
+CREATE DATABASE audit_db;
+CREATE DATABASE notification_db;
+CREATE DATABASE keycloak_db;

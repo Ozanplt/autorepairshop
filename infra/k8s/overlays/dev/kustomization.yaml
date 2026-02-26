@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: autorepairshop-dev
+
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - patches/replicas.yaml
+  - patches/resources.yaml
+
+configMapGenerator:
+  - name: app-config
+    literals:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+
+images:
+  - name: autorepairshop/gateway-service
+    newTag: latest
+  - name: autorepairshop/workorder-service
+    newTag: latest
+  - name: autorepairshop/customer-service
+    newTag: latest

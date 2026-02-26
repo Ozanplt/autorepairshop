@@ -1,0 +1,152 @@
+spring:
+  application:
+    name: gateway-service
+  
+  cloud:
+    gateway:
+      routes:
+        - id: tenantadmin-service
+          uri: ${TENANTADMIN_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/v1/tenants/**, /v1/branches/**, /v1/roles/**, /v1/memberships/**, /v1/policies/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+        
+        - id: customer-service
+          uri: ${CUSTOMER_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/v1/customers/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+        
+        - id: vehicle-service
+          uri: ${VEHICLE_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/v1/vehicles/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+        
+        - id: workorder-service
+          uri: ${WORKORDER_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/v1/workorders/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+        
+        - id: inventory-service
+          uri: ${INVENTORY_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/v1/inventory/**, /v1/parts/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+        
+        - id: payment-service
+          uri: ${PAYMENT_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/v1/invoices/**, /v1/payments/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+        
+        - id: appointment-service
+          uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/v1/appointments/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+        
+        - id: file-service
+          uri: ${FILE_SERVICE_URL:http://localhost:8088}
+          predicates:
+            - Path=/v1/files/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+        
+        - id: query-bff-service
+          uri: ${QUERY_BFF_SERVICE_URL:http://localhost:8091}
+          predicates:
+            - Path=/v1/query/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+      
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "${FRONTEND_URL:http://localhost:5173}"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+      
+      default-filters:
+        - AddRequestHeader=X-Request-Id, ${random.uuid}
+        - AddResponseHeader=X-Content-Type-Options, nosniff
+        - AddResponseHeader=X-Frame-Options, DENY
+        - AddResponseHeader=X-XSS-Protection, 1; mode=block
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9080/realms/autorepairshop}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:9080/realms/autorepairshop/protocol/openid-connect/certs}
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.autorepair: INFO
