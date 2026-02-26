@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from 'react-oidc-context'
 import App from './App'
 import './i18n'
+import './index.css'
 
 const oidcConfig = {
   authority: import.meta.env.VITE_KEYCLOAK_URL + '/realms/' + import.meta.env.VITE_KEYCLOAK_REALM,
