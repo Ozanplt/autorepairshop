@@ -271,5 +271,4 @@ repair/
     k8s/                           # Kubernetes manifest'leri
     observability/                 # Prometheus + Grafana
   .github/workflows/              # CI/CD
-  empty commit
 ```
