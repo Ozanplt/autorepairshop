@@ -8,6 +8,9 @@
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
+  "internationalizationEnabled": true,
+  "supportedLocales": ["en", "tr"],
+  "defaultLocale": "tr",
   "clients": [
     {
       "clientId": "frontend",

@@ -25,22 +25,35 @@ function WorkOrders() {
 
   const fetchAll = async () => {
     try {
-      const [woRes, custRes, vehRes] = await Promise.all([
+      const [woRes, custRes, vehRes] = await Promise.allSettled([
         apiClient.get('/v1/workorders'),
         apiClient.get('/v1/customers'),
         apiClient.get('/v1/vehicles')
       ])
-      setWorkOrders(extractList(woRes.data))
 
-      const cMap: Record<string, string> = {}
-      extractList(custRes.data).forEach((c: any) => { if (c.id) cMap[c.id] = c.fullName || '-' })
-      setCustomerMap(cMap)
+      if (woRes.status === 'fulfilled') {
+        setWorkOrders(extractList(woRes.value.data))
+      } else {
+        console.error('Failed to fetch work orders:', woRes.reason)
+      }
 
-      const vMap: Record<string, string> = {}
-      extractList(vehRes.data).forEach((v: any) => { if (v.id) vMap[v.id] = v.rawPlate || v.normalizedPlate || '-' })
-      setVehicleMap(vMap)
+      if (custRes.status === 'fulfilled') {
+        const cMap: Record<string, string> = {}
+        extractList(custRes.value.data).forEach((c: any) => { if (c.id) cMap[c.id] = c.fullName || '-' })
+        setCustomerMap(cMap)
+      } else {
+        console.warn('Failed to fetch customers:', custRes.reason)
+      }
+
+      if (vehRes.status === 'fulfilled') {
+        const vMap: Record<string, string> = {}
+        extractList(vehRes.value.data).forEach((v: any) => { if (v.id) vMap[v.id] = v.rawPlate || v.normalizedPlate || '-' })
+        setVehicleMap(vMap)
+      } else {
+        console.warn('Failed to fetch vehicles:', vehRes.reason)
+      }
     } catch (error) {
-      console.error('Failed to fetch work orders:', error)
+      console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
