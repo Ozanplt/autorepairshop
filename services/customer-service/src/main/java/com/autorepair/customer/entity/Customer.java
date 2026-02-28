@@ -63,11 +63,8 @@ public class Customer {
     @Column(name = "updated_by_user_id")
     private UUID updatedByUserId;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
-
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
+    @Column(name = "is_actv", nullable = false)
+    private boolean active = true;
 
     @Version
     private Long version = 0L;

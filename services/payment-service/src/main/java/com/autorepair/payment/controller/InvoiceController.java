@@ -1,9 +1,8 @@
 package com.autorepair.payment.controller;
 
-import com.autorepair.common.security.TenantContext;
 import com.autorepair.payment.dto.InvoiceResponse;
-import com.autorepair.payment.entity.Invoice;
-import com.autorepair.payment.repository.InvoiceRepository;
+import com.autorepair.payment.service.InvoiceService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -14,47 +13,18 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/invoices")
+@RequiredArgsConstructor
 public class InvoiceController {
 
-    private final InvoiceRepository invoiceRepository;
-
-    public InvoiceController(InvoiceRepository invoiceRepository) {
-        this.invoiceRepository = invoiceRepository;
-    }
+    private final InvoiceService invoiceService;
 
     @GetMapping
     public ResponseEntity<Page<InvoiceResponse>> list(@PageableDefault(size = 20) Pageable pageable) {
-        UUID tenantId = TenantContext.getTenantId();
-        Page<Invoice> page = invoiceRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
-        return ResponseEntity.ok(page.map(this::toResponse));
+        return ResponseEntity.ok(invoiceService.list(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable UUID id) {
-        UUID tenantId = TenantContext.getTenantId();
-        Invoice inv = invoiceRepository.findByIdAndIsDeletedFalse(id)
-                .filter(i -> tenantId.equals(i.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
-        return ResponseEntity.ok(toResponse(inv));
-    }
-
-    private InvoiceResponse toResponse(Invoice inv) {
-        return InvoiceResponse.builder()
-                .id(inv.getId())
-                .tenantId(inv.getTenantId())
-                .workOrderId(inv.getWorkOrderId())
-                .customerId(inv.getCustomerId())
-                .invoiceNumber(inv.getInvoiceNumber())
-                .currency(inv.getCurrency())
-                .subtotal(inv.getSubtotal())
-                .taxTotal(inv.getTaxTotal())
-                .discountTotal(inv.getDiscountTotal())
-                .grandTotal(inv.getGrandTotal())
-                .status(inv.getStatus())
-                .issuedAt(inv.getIssuedAt())
-                .dueAt(inv.getDueAt())
-                .paidAt(inv.getPaidAt())
-                .createdAt(inv.getCreatedAt())
-                .build();
+        return ResponseEntity.ok(invoiceService.getById(id));
     }
 }

@@ -12,11 +12,11 @@ import java.util.UUID;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
-    Page<Invoice> findByTenantIdAndIsDeletedFalse(UUID tenantId, Pageable pageable);
+    Page<Invoice> findByTenantIdAndActiveTrue(UUID tenantId, Pageable pageable);
 
-    Page<Invoice> findByIsDeletedFalse(Pageable pageable);
+    Page<Invoice> findByActiveTrue(Pageable pageable);
 
-    Page<Invoice> findByTenantIdAndWorkOrderIdAndIsDeletedFalse(UUID tenantId, UUID workOrderId, Pageable pageable);
+    Page<Invoice> findByTenantIdAndWorkOrderIdAndActiveTrue(UUID tenantId, UUID workOrderId, Pageable pageable);
 
-    Optional<Invoice> findByIdAndIsDeletedFalse(UUID id);
+    Optional<Invoice> findByIdAndActiveTrue(UUID id);
 }

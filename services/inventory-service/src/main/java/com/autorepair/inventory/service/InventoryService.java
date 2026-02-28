@@ -1,6 +1,7 @@
 package com.autorepair.inventory.service;
 
 import com.autorepair.common.security.TenantContext;
+import com.autorepair.common.security.exception.ResourceNotFoundException;
 import com.autorepair.inventory.dto.CreateInventoryPartRequest;
 import com.autorepair.inventory.dto.InventoryPartResponse;
 import com.autorepair.inventory.entity.InventoryPart;
@@ -51,25 +52,25 @@ public class InventoryService {
     public Page<InventoryPartResponse> list(Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         Page<InventoryPart> page;
-        page = repository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
+        page = repository.findByTenantIdAndActiveTrue(tenantId, pageable);
         return page.map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
     public InventoryPartResponse getById(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
-        InventoryPart part = repository.findByIdAndIsDeletedFalse(id)
+        InventoryPart part = repository.findByIdAndActiveTrue(id)
                 .filter(p -> tenantId.equals(p.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Part not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("InventoryPart", id));
         return toResponse(part);
     }
 
     @Transactional
     public InventoryPartResponse adjustStock(UUID id, int adjustment) {
         UUID tenantId = TenantContext.getTenantId();
-        InventoryPart part = repository.findByIdAndIsDeletedFalse(id)
+        InventoryPart part = repository.findByIdAndActiveTrue(id)
                 .filter(p -> tenantId.equals(p.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Part not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("InventoryPart", id));
         int newQty = part.getQuantityOnHand() + adjustment;
         if (newQty < 0) {
             throw new IllegalStateException("Insufficient stock for part: " + part.getPartCode());

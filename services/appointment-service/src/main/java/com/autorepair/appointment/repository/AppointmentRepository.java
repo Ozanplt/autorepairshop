@@ -14,15 +14,15 @@ import java.util.UUID;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
 
-    Page<Appointment> findByTenantIdAndIsDeletedFalse(UUID tenantId, Pageable pageable);
+    Page<Appointment> findByTenantIdAndActiveTrue(UUID tenantId, Pageable pageable);
 
-    Page<Appointment> findByIsDeletedFalse(Pageable pageable);
+    Page<Appointment> findByActiveTrue(Pageable pageable);
 
-    Page<Appointment> findByTenantIdAndAppointmentDateAndIsDeletedFalse(UUID tenantId, LocalDate date, Pageable pageable);
+    Page<Appointment> findByTenantIdAndAppointmentDateAndActiveTrue(UUID tenantId, LocalDate date, Pageable pageable);
 
-    List<Appointment> findByTenantIdAndAppointmentDateBetweenAndIsDeletedFalse(UUID tenantId, LocalDate from, LocalDate to);
+    List<Appointment> findByTenantIdAndAppointmentDateBetweenAndActiveTrue(UUID tenantId, LocalDate from, LocalDate to);
 
-    Optional<Appointment> findByIdAndIsDeletedFalse(UUID id);
+    Optional<Appointment> findByIdAndActiveTrue(UUID id);
 
-    long countByTenantIdAndAppointmentDateAndIsDeletedFalse(UUID tenantId, LocalDate date);
+    long countByTenantIdAndAppointmentDateAndActiveTrue(UUID tenantId, LocalDate date);
 }

@@ -64,11 +64,8 @@ public class InventoryPart {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
-
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
+    @Column(name = "is_actv", nullable = false)
+    private boolean active = true;
 
     @Version
     private Long version = 0L;

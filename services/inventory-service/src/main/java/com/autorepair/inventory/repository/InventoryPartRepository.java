@@ -12,11 +12,11 @@ import java.util.UUID;
 @Repository
 public interface InventoryPartRepository extends JpaRepository<InventoryPart, UUID> {
 
-    Page<InventoryPart> findByTenantIdAndIsDeletedFalse(UUID tenantId, Pageable pageable);
+    Page<InventoryPart> findByTenantIdAndActiveTrue(UUID tenantId, Pageable pageable);
 
-    Page<InventoryPart> findByIsDeletedFalse(Pageable pageable);
+    Page<InventoryPart> findByActiveTrue(Pageable pageable);
 
-    Optional<InventoryPart> findByIdAndIsDeletedFalse(UUID id);
+    Optional<InventoryPart> findByIdAndActiveTrue(UUID id);
 
-    Page<InventoryPart> findByTenantIdAndNameContainingIgnoreCaseAndIsDeletedFalse(UUID tenantId, String name, Pageable pageable);
+    Page<InventoryPart> findByTenantIdAndNameContainingIgnoreCaseAndActiveTrue(UUID tenantId, String name, Pageable pageable);
 }

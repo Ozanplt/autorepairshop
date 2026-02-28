@@ -1,6 +1,7 @@
 package com.autorepair.workorder.service;
 
 import com.autorepair.common.security.TenantContext;
+import com.autorepair.common.security.exception.ResourceNotFoundException;
 import com.autorepair.workorder.dto.FastIntakeRequest;
 import com.autorepair.workorder.dto.WorkOrderResponse;
 import com.autorepair.workorder.entity.WorkOrder;
@@ -69,7 +70,7 @@ public class WorkOrderService {
     public Page<WorkOrderResponse> listWorkOrders(Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         Page<WorkOrder> page;
-        page = workOrderRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
+        page = workOrderRepository.findByTenantIdAndActiveTrue(tenantId, pageable);
         return page.map(wo -> WorkOrderResponse.builder()
                 .id(wo.getId())
                 .tenantId(wo.getTenantId())
@@ -96,9 +97,9 @@ public class WorkOrderService {
     @Transactional
     public WorkOrderResponse updateStatus(UUID id, String newStatus) {
         UUID tenantId = TenantContext.getTenantId();
-        WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
+        WorkOrder wo = workOrderRepository.findByIdAndActiveTrue(id)
                 .filter(w -> tenantId.equals(w.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Work order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("WorkOrder", id));
 
         String currentStatus = wo.getStatus();
         java.util.Set<String> allowed = VALID_TRANSITIONS.getOrDefault(currentStatus, java.util.Set.of());
@@ -130,11 +131,10 @@ public class WorkOrderService {
     @Transactional
     public void deleteWorkOrder(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
-        WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
+        WorkOrder wo = workOrderRepository.findByIdAndActiveTrue(id)
                 .filter(w -> tenantId.equals(w.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Work order not found"));
-        wo.setDeleted(true);
-        wo.setDeletedAt(Instant.now());
+                .orElseThrow(() -> new ResourceNotFoundException("WorkOrder", id));
+        wo.setActive(false);
         wo.setUpdatedAt(Instant.now());
         workOrderRepository.save(wo);
     }
@@ -142,9 +142,9 @@ public class WorkOrderService {
     @Transactional(readOnly = true)
     public WorkOrderResponse getWorkOrder(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
-        WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
+        WorkOrder wo = workOrderRepository.findByIdAndActiveTrue(id)
                 .filter(w -> tenantId.equals(w.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Work order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("WorkOrder", id));
         return WorkOrderResponse.builder()
                 .id(wo.getId())
                 .tenantId(wo.getTenantId())

@@ -5,6 +5,7 @@ import com.autorepair.appointment.dto.CreateAppointmentRequest;
 import com.autorepair.appointment.entity.Appointment;
 import com.autorepair.appointment.repository.AppointmentRepository;
 import com.autorepair.common.security.TenantContext;
+import com.autorepair.common.security.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,25 +52,25 @@ public class AppointmentService {
     public Page<AppointmentResponse> list(Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         Page<Appointment> page;
-        page = appointmentRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
+        page = appointmentRepository.findByTenantIdAndActiveTrue(tenantId, pageable);
         return page.map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
     public AppointmentResponse getById(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
-        Appointment appointment = appointmentRepository.findByIdAndIsDeletedFalse(id)
+        Appointment appointment = appointmentRepository.findByIdAndActiveTrue(id)
                 .filter(a -> tenantId.equals(a.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Appointment not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
         return toResponse(appointment);
     }
 
     @Transactional
     public AppointmentResponse updateStatus(UUID id, String newStatus) {
         UUID tenantId = TenantContext.getTenantId();
-        Appointment appointment = appointmentRepository.findByIdAndIsDeletedFalse(id)
+        Appointment appointment = appointmentRepository.findByIdAndActiveTrue(id)
                 .filter(a -> tenantId.equals(a.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Appointment not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
         appointment.setStatus(newStatus);
         appointment.setUpdatedAt(Instant.now());
         appointmentRepository.save(appointment);
@@ -79,9 +80,9 @@ public class AppointmentService {
     @Transactional
     public void cancel(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
-        Appointment appointment = appointmentRepository.findByIdAndIsDeletedFalse(id)
+        Appointment appointment = appointmentRepository.findByIdAndActiveTrue(id)
                 .filter(a -> tenantId.equals(a.getTenantId()))
-                .orElseThrow(() -> new RuntimeException("Appointment not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
         appointment.setStatus("CANCELED");
         appointment.setUpdatedAt(Instant.now());
         appointmentRepository.save(appointment);

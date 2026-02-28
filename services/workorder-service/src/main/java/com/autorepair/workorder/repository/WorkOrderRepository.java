@@ -12,9 +12,9 @@ import java.util.UUID;
 @Repository
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {
 
-    Page<WorkOrder> findByTenantIdAndIsDeletedFalse(UUID tenantId, Pageable pageable);
+    Page<WorkOrder> findByTenantIdAndActiveTrue(UUID tenantId, Pageable pageable);
 
-    Page<WorkOrder> findByIsDeletedFalse(Pageable pageable);
+    Page<WorkOrder> findByActiveTrue(Pageable pageable);
 
-    Optional<WorkOrder> findByIdAndIsDeletedFalse(UUID id);
+    Optional<WorkOrder> findByIdAndActiveTrue(UUID id);
 }
