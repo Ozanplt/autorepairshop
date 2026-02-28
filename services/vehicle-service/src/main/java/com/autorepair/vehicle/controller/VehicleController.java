@@ -35,7 +35,7 @@ public class VehicleController {
 
         Vehicle vehicle = new Vehicle();
         vehicle.setId(UUID.randomUUID());
-        vehicle.setTenantId(tenantId != null ? tenantId : UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        vehicle.setTenantId(tenantId);
         vehicle.setBranchId(branchId);
         vehicle.setCustomerId(request.getCustomerId());
         vehicle.setRawPlate(request.getRawPlate().trim());
@@ -65,13 +65,9 @@ public class VehicleController {
         UUID tenantId = TenantContext.getTenantId();
         Page<Vehicle> page;
         if (plate != null && !plate.isBlank()) {
-            page = tenantId != null
-                    ? vehicleRepository.findByTenantIdAndRawPlateContainingIgnoreCaseAndIsDeletedFalse(tenantId, plate, pageable)
-                    : vehicleRepository.findByRawPlateContainingIgnoreCaseAndIsDeletedFalse(plate, pageable);
+            page = vehicleRepository.findByTenantIdAndRawPlateContainingIgnoreCaseAndIsDeletedFalse(tenantId, plate, pageable);
         } else {
-            page = tenantId != null
-                    ? vehicleRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable)
-                    : vehicleRepository.findByIsDeletedFalse(pageable);
+            page = vehicleRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
         }
         return ResponseEntity.ok(page.map(this::toResponse));
     }
@@ -81,7 +77,7 @@ public class VehicleController {
         UUID tenantId = TenantContext.getTenantId();
         return vehicleRepository.findById(id)
                 .filter(v -> !v.isDeleted())
-                .filter(v -> tenantId == null || v.getTenantId().equals(tenantId))
+                .filter(v -> tenantId.equals(v.getTenantId()))
                 .map(v -> {
                     v.setDeleted(true);
                     v.setDeletedAt(Instant.now());

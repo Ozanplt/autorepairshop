@@ -27,7 +27,7 @@ public class InventoryService {
 
         InventoryPart part = new InventoryPart();
         part.setId(UUID.randomUUID());
-        part.setTenantId(tenantId != null ? tenantId : UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        part.setTenantId(tenantId);
         part.setBranchId(branchId);
         part.setPartCode(request.getPartCode().trim());
         part.setName(request.getName().trim());
@@ -51,11 +51,7 @@ public class InventoryService {
     public Page<InventoryPartResponse> list(Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         Page<InventoryPart> page;
-        if (tenantId != null) {
-            page = repository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
-        } else {
-            page = repository.findByIsDeletedFalse(pageable);
-        }
+        page = repository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
         return page.map(this::toResponse);
     }
 
@@ -63,10 +59,8 @@ public class InventoryService {
     public InventoryPartResponse getById(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
         InventoryPart part = repository.findByIdAndIsDeletedFalse(id)
+                .filter(p -> tenantId.equals(p.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Part not found: " + id));
-        if (tenantId != null && !tenantId.equals(part.getTenantId())) {
-            throw new RuntimeException("Part not found: " + id);
-        }
         return toResponse(part);
     }
 
@@ -74,10 +68,8 @@ public class InventoryService {
     public InventoryPartResponse adjustStock(UUID id, int adjustment) {
         UUID tenantId = TenantContext.getTenantId();
         InventoryPart part = repository.findByIdAndIsDeletedFalse(id)
+                .filter(p -> tenantId.equals(p.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Part not found: " + id));
-        if (tenantId != null && !tenantId.equals(part.getTenantId())) {
-            throw new RuntimeException("Part not found: " + id);
-        }
         int newQty = part.getQuantityOnHand() + adjustment;
         if (newQty < 0) {
             throw new IllegalStateException("Insufficient stock for part: " + part.getPartCode());

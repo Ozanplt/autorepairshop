@@ -25,15 +25,15 @@ public class InvoiceController {
     @GetMapping
     public ResponseEntity<Page<InvoiceResponse>> list(@PageableDefault(size = 20) Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
-        Page<Invoice> page = tenantId != null
-                ? invoiceRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable)
-                : invoiceRepository.findByIsDeletedFalse(pageable);
+        Page<Invoice> page = invoiceRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
         return ResponseEntity.ok(page.map(this::toResponse));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable UUID id) {
+        UUID tenantId = TenantContext.getTenantId();
         Invoice inv = invoiceRepository.findByIdAndIsDeletedFalse(id)
+                .filter(i -> tenantId.equals(i.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Invoice not found"));
         return ResponseEntity.ok(toResponse(inv));
     }

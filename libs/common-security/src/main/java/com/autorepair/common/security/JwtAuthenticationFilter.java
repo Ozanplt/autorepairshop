@@ -19,6 +19,12 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/actuator") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
@@ -27,13 +33,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authentication instanceof JwtAuthenticationToken jwtAuth) {
             Jwt jwt = jwtAuth.getToken();
             
+            String tenantId = jwt.getClaimAsString("tenant_id");
+            if (tenantId == null || tenantId.isBlank()) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Missing tenant_id claim in token\"}");
+                return;
+            }
+
             TenantContext context = new TenantContext();
             context.setUserId(jwt.getSubject());
-            
-            String tenantId = jwt.getClaimAsString("tenant_id");
-            if (tenantId != null) {
-                context.setTenantId(UUID.fromString(tenantId));
-            }
+            context.setTenantId(UUID.fromString(tenantId));
             
             String branchId = jwt.getClaimAsString("branch_id");
             if (branchId != null) {

@@ -39,7 +39,7 @@ public class WorkOrderService {
 
         WorkOrder wo = new WorkOrder();
         wo.setId(UUID.randomUUID());
-        wo.setTenantId(tenantId != null ? tenantId : UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        wo.setTenantId(tenantId);
         wo.setBranchId(branchId);
         wo.setCustomerId(customerId != null ? customerId : UUID.randomUUID());
         wo.setVehicleId(vehicleId != null ? vehicleId : UUID.randomUUID());
@@ -69,11 +69,7 @@ public class WorkOrderService {
     public Page<WorkOrderResponse> listWorkOrders(Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         Page<WorkOrder> page;
-        if (tenantId != null) {
-            page = workOrderRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
-        } else {
-            page = workOrderRepository.findByIsDeletedFalse(pageable);
-        }
+        page = workOrderRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
         return page.map(wo -> WorkOrderResponse.builder()
                 .id(wo.getId())
                 .tenantId(wo.getTenantId())
@@ -101,7 +97,7 @@ public class WorkOrderService {
     public WorkOrderResponse updateStatus(UUID id, String newStatus) {
         UUID tenantId = TenantContext.getTenantId();
         WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
-                .filter(w -> tenantId == null || w.getTenantId().equals(tenantId))
+                .filter(w -> tenantId.equals(w.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Work order not found"));
 
         String currentStatus = wo.getStatus();
@@ -135,7 +131,7 @@ public class WorkOrderService {
     public void deleteWorkOrder(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
         WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
-                .filter(w -> tenantId == null || w.getTenantId().equals(tenantId))
+                .filter(w -> tenantId.equals(w.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Work order not found"));
         wo.setDeleted(true);
         wo.setDeletedAt(Instant.now());
@@ -147,7 +143,7 @@ public class WorkOrderService {
     public WorkOrderResponse getWorkOrder(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
         WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
-                .filter(w -> tenantId == null || w.getTenantId().equals(tenantId))
+                .filter(w -> tenantId.equals(w.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Work order not found"));
         return WorkOrderResponse.builder()
                 .id(wo.getId())

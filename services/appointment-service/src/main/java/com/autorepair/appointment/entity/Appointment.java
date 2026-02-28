@@ -35,7 +35,7 @@ public class Appointment {
     @Column(name = "work_order_id")
     private UUID workOrderId;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String title;
 
     @Column(columnDefinition = "TEXT")

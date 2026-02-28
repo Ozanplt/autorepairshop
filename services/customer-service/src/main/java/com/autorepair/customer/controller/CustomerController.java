@@ -34,7 +34,7 @@ public class CustomerController {
 
         Customer customer = new Customer();
         customer.setId(UUID.randomUUID());
-        customer.setTenantId(tenantId != null ? tenantId : UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        customer.setTenantId(tenantId);
         customer.setBranchId(branchId);
         customer.setFullName(request.getFullName().trim());
         customer.setPhoneE164(request.getPhoneE164());
@@ -60,13 +60,9 @@ public class CustomerController {
         UUID tenantId = TenantContext.getTenantId();
         Page<Customer> page;
         if (q != null && !q.isBlank()) {
-            page = tenantId != null
-                    ? customerRepository.findByTenantIdAndFullNameContainingIgnoreCaseAndIsDeletedFalse(tenantId, q, pageable)
-                    : customerRepository.findByFullNameContainingIgnoreCaseAndIsDeletedFalse(q, pageable);
+            page = customerRepository.findByTenantIdAndFullNameContainingIgnoreCaseAndIsDeletedFalse(tenantId, q, pageable);
         } else {
-            page = tenantId != null
-                    ? customerRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable)
-                    : customerRepository.findByIsDeletedFalse(pageable);
+            page = customerRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
         }
         return ResponseEntity.ok(page.map(this::toResponse));
     }
@@ -76,7 +72,7 @@ public class CustomerController {
         UUID tenantId = TenantContext.getTenantId();
         return customerRepository.findById(id)
                 .filter(c -> !c.isDeleted())
-                .filter(c -> tenantId == null || c.getTenantId().equals(tenantId))
+                .filter(c -> tenantId.equals(c.getTenantId()))
                 .map(c -> ResponseEntity.ok(toResponse(c)))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -86,7 +82,7 @@ public class CustomerController {
         UUID tenantId = TenantContext.getTenantId();
         return customerRepository.findById(id)
                 .filter(c -> !c.isDeleted())
-                .filter(c -> tenantId == null || c.getTenantId().equals(tenantId))
+                .filter(c -> tenantId.equals(c.getTenantId()))
                 .map(c -> {
                     c.setDeleted(true);
                     c.setDeletedAt(Instant.now());

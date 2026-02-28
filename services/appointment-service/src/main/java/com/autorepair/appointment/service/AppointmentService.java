@@ -27,7 +27,7 @@ public class AppointmentService {
 
         Appointment appointment = new Appointment();
         appointment.setId(UUID.randomUUID());
-        appointment.setTenantId(tenantId != null ? tenantId : UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        appointment.setTenantId(tenantId);
         appointment.setBranchId(branchId);
         appointment.setCustomerId(request.getCustomerId());
         appointment.setVehicleId(request.getVehicleId());
@@ -51,11 +51,7 @@ public class AppointmentService {
     public Page<AppointmentResponse> list(Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         Page<Appointment> page;
-        if (tenantId != null) {
-            page = appointmentRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
-        } else {
-            page = appointmentRepository.findByIsDeletedFalse(pageable);
-        }
+        page = appointmentRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable);
         return page.map(this::toResponse);
     }
 
@@ -63,10 +59,8 @@ public class AppointmentService {
     public AppointmentResponse getById(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
         Appointment appointment = appointmentRepository.findByIdAndIsDeletedFalse(id)
+                .filter(a -> tenantId.equals(a.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Appointment not found: " + id));
-        if (tenantId != null && !tenantId.equals(appointment.getTenantId())) {
-            throw new RuntimeException("Appointment not found: " + id);
-        }
         return toResponse(appointment);
     }
 
@@ -74,10 +68,8 @@ public class AppointmentService {
     public AppointmentResponse updateStatus(UUID id, String newStatus) {
         UUID tenantId = TenantContext.getTenantId();
         Appointment appointment = appointmentRepository.findByIdAndIsDeletedFalse(id)
+                .filter(a -> tenantId.equals(a.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Appointment not found: " + id));
-        if (tenantId != null && !tenantId.equals(appointment.getTenantId())) {
-            throw new RuntimeException("Appointment not found: " + id);
-        }
         appointment.setStatus(newStatus);
         appointment.setUpdatedAt(Instant.now());
         appointmentRepository.save(appointment);
@@ -88,10 +80,8 @@ public class AppointmentService {
     public void cancel(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
         Appointment appointment = appointmentRepository.findByIdAndIsDeletedFalse(id)
+                .filter(a -> tenantId.equals(a.getTenantId()))
                 .orElseThrow(() -> new RuntimeException("Appointment not found: " + id));
-        if (tenantId != null && !tenantId.equals(appointment.getTenantId())) {
-            throw new RuntimeException("Appointment not found: " + id);
-        }
         appointment.setStatus("CANCELED");
         appointment.setUpdatedAt(Instant.now());
         appointmentRepository.save(appointment);
