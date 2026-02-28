@@ -1,6 +1,8 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
+const savedLng = localStorage.getItem('i18n_language') || 'en'
+
 i18n
   .use(initReactI18next)
   .init({
@@ -8,6 +10,9 @@ i18n
       en: {
         translation: {
           'app.title': 'AutoRepairShop Management System',
+          'common.loading': 'Loading...',
+          'common.view': 'View',
+          'common.noData': 'No data found',
           'login.loading': 'Redirecting to login...',
           'login.subtitle': 'Sign in to manage your auto repair shop',
           'login.button': 'Sign In',
@@ -27,20 +32,50 @@ i18n
           'fastIntake.error': 'Failed to create work order',
           'workOrders.title': 'Work Orders',
           'workOrders.createNew': 'New Work Order',
+          'workOrders.id': 'ID',
+          'workOrders.customer': 'Customer',
+          'workOrders.vehicle': 'Vehicle',
+          'workOrders.problem': 'Problem',
+          'workOrders.status': 'Status',
+          'workOrders.created': 'Created',
           'customers.title': 'Customers',
           'customers.search': 'Search',
           'customers.searchPlaceholder': 'Search by name or phone...',
+          'customers.name': 'Name',
+          'customers.phone': 'Phone',
+          'customers.email': 'Email',
+          'customers.type': 'Type',
           'vehicles.title': 'Vehicles',
           'vehicles.search': 'Search',
           'vehicles.searching': 'Searching...',
           'vehicles.searchPlaceholder': 'Search by license plate...',
+          'vehicles.plate': 'Plate',
+          'vehicles.make': 'Make',
+          'vehicles.model': 'Model',
+          'vehicles.year': 'Year',
+          'vehicles.customer': 'Customer',
+          'vehicles.noResults': 'No vehicles found',
           'invoices.title': 'Invoices',
-          'admin.title': 'Administration'
+          'invoices.invoiceNumber': 'Invoice #',
+          'invoices.customer': 'Customer',
+          'invoices.amount': 'Amount',
+          'invoices.status': 'Status',
+          'invoices.date': 'Date',
+          'admin.title': 'Administration',
+          'admin.tenants': 'Tenants & Branches',
+          'admin.manageOrg': 'Manage Organizations',
+          'admin.roles': 'Roles & Permissions',
+          'admin.manageAccess': 'Manage Access Control',
+          'admin.policies': 'Policies',
+          'admin.manageRules': 'Manage Business Rules'
         }
       },
       tr: {
         translation: {
           'app.title': 'Oto Tamir Yonetim Sistemi',
+          'common.loading': 'Yukleniyor...',
+          'common.view': 'Goruntule',
+          'common.noData': 'Veri bulunamadi',
           'login.loading': 'Giris sayfasina yonlendiriliyor...',
           'login.subtitle': 'Oto tamir dukkani yonetimi icin giris yapin',
           'login.button': 'Giris Yap',
@@ -60,23 +95,54 @@ i18n
           'fastIntake.error': 'Is emri olusturulamadi',
           'workOrders.title': 'Is Emirleri',
           'workOrders.createNew': 'Yeni Is Emri',
+          'workOrders.id': 'ID',
+          'workOrders.customer': 'Musteri',
+          'workOrders.vehicle': 'Arac',
+          'workOrders.problem': 'Sorun',
+          'workOrders.status': 'Durum',
+          'workOrders.created': 'Olusturulma',
           'customers.title': 'Musteriler',
           'customers.search': 'Ara',
           'customers.searchPlaceholder': 'Isim veya telefon ile ara...',
+          'customers.name': 'Ad Soyad',
+          'customers.phone': 'Telefon',
+          'customers.email': 'E-posta',
+          'customers.type': 'Tur',
           'vehicles.title': 'Araclar',
           'vehicles.search': 'Ara',
           'vehicles.searching': 'Araniyor...',
           'vehicles.searchPlaceholder': 'Plaka ile ara...',
+          'vehicles.plate': 'Plaka',
+          'vehicles.make': 'Marka',
+          'vehicles.model': 'Model',
+          'vehicles.year': 'Yil',
+          'vehicles.customer': 'Musteri',
+          'vehicles.noResults': 'Arac bulunamadi',
           'invoices.title': 'Faturalar',
-          'admin.title': 'Yonetim'
+          'invoices.invoiceNumber': 'Fatura No',
+          'invoices.customer': 'Musteri',
+          'invoices.amount': 'Tutar',
+          'invoices.status': 'Durum',
+          'invoices.date': 'Tarih',
+          'admin.title': 'Yonetim',
+          'admin.tenants': 'Subeler & Isletmeler',
+          'admin.manageOrg': 'Organizasyonlari Yonet',
+          'admin.roles': 'Roller & Yetkiler',
+          'admin.manageAccess': 'Erisim Kontrolu Yonet',
+          'admin.policies': 'Politikalar',
+          'admin.manageRules': 'Is Kurallarini Yonet'
         }
       }
     },
-    lng: 'en',
+    lng: savedLng,
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false
     }
   })
+
+i18n.on('languageChanged', (lng: string) => {
+  localStorage.setItem('i18n_language', lng)
+})
 
 export default i18n

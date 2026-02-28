@@ -24,7 +24,7 @@ function Invoices() {
   }
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>
+    return <div className="text-center py-8">{t('common.loading')}</div>
   }
 
   return (
@@ -35,11 +35,11 @@ function Invoices() {
           <table className="min-w-full divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Invoice #</th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Customer</th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Amount</th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
+                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('invoices.invoiceNumber')}</th>
+                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('invoices.customer')}</th>
+                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('invoices.amount')}</th>
+                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('invoices.status')}</th>
+                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('invoices.date')}</th>
                 <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                   <span className="sr-only">Actions</span>
                 </th>
@@ -65,7 +65,7 @@ function Invoices() {
                   </td>
                   <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                     <Link to={`/invoices/${invoice.id}`} className="text-blue-600 hover:text-blue-900">
-                      View
+                      {t('common.view')}
                     </Link>
                   </td>
                 </tr>

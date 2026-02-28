@@ -10,6 +10,7 @@ const oidcConfig = {
   authority: import.meta.env.VITE_KEYCLOAK_URL + '/realms/' + import.meta.env.VITE_KEYCLOAK_REALM,
   client_id: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'frontend',
   redirect_uri: window.location.origin,
+  post_logout_redirect_uri: window.location.origin,
   response_type: 'code',
   scope: 'openid profile email',
   automaticSilentRenew: true,

@@ -30,7 +30,7 @@ function Customers() {
       return
     }
     try {
-      const response = await apiClient.get(`/v1/customers/search?q=${searchQuery}`)
+      const response = await apiClient.get('/v1/customers', { params: { q: searchQuery } })
       setCustomers(response.data.content || [])
     } catch (error) {
       console.error('Failed to search customers:', error)
@@ -38,7 +38,7 @@ function Customers() {
   }
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>
+    return <div className="text-center py-8">{t('common.loading')}</div>
   }
 
   return (
@@ -73,10 +73,10 @@ function Customers() {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Phone</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Type</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('customers.name')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('customers.phone')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('customers.email')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('customers.type')}</th>
                     <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span className="sr-only">Actions</span>
                     </th>
@@ -99,7 +99,7 @@ function Customers() {
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <Link to={`/customers/${customer.id}`} className="text-blue-600 hover:text-blue-900">
-                          View
+                          {t('common.view')}
                         </Link>
                       </td>
                     </tr>

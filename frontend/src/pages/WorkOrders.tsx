@@ -35,7 +35,7 @@ function WorkOrders() {
   }
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>
+    return <div className="text-center py-8">{t('common.loading')}</div>
   }
 
   return (
@@ -60,12 +60,12 @@ function WorkOrders() {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ID</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Customer</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Vehicle</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Problem</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('workOrders.id')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('workOrders.customer')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('workOrders.vehicle')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('workOrders.problem')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('workOrders.status')}</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{t('workOrders.created')}</th>
                     <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span className="sr-only">Actions</span>
                     </th>
@@ -96,7 +96,7 @@ function WorkOrders() {
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <Link to={`/workorders/${wo.id}`} className="text-blue-600 hover:text-blue-900">
-                          View
+                          {t('common.view')}
                         </Link>
                       </td>
                     </tr>

@@ -18,10 +18,10 @@ function Admin() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Tenants & Branches
+                    {t('admin.tenants')}
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    Manage Organizations
+                    {t('admin.manageOrg')}
                   </dd>
                 </dl>
               </div>
@@ -40,10 +40,10 @@ function Admin() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Roles & Permissions
+                    {t('admin.roles')}
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    Manage Access Control
+                    {t('admin.manageAccess')}
                   </dd>
                 </dl>
               </div>
@@ -62,10 +62,10 @@ function Admin() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Policies
+                    {t('admin.policies')}
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    Manage Business Rules
+                    {t('admin.manageRules')}
                   </dd>
                 </dl>
               </div>
