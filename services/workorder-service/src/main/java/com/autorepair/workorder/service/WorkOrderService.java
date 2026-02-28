@@ -131,6 +131,18 @@ public class WorkOrderService {
                 .build();
     }
 
+    @Transactional
+    public void deleteWorkOrder(UUID id) {
+        UUID tenantId = TenantContext.getTenantId();
+        WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
+                .filter(w -> tenantId == null || w.getTenantId().equals(tenantId))
+                .orElseThrow(() -> new RuntimeException("Work order not found"));
+        wo.setDeleted(true);
+        wo.setDeletedAt(Instant.now());
+        wo.setUpdatedAt(Instant.now());
+        workOrderRepository.save(wo);
+    }
+
     @Transactional(readOnly = true)
     public WorkOrderResponse getWorkOrder(UUID id) {
         UUID tenantId = TenantContext.getTenantId();

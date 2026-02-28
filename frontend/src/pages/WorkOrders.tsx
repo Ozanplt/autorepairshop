@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from 'react-oidc-context'
 import apiClient from '../api/client'
-import { canCreateWorkOrder } from '../auth/roles'
+import { canCreateWorkOrder, canManageCustomers } from '../auth/roles'
+import { useToast } from '../components/Toast'
 
 function extractList(data: any): any[] {
   if (Array.isArray(data)) return data
@@ -14,6 +15,7 @@ function extractList(data: any): any[] {
 function WorkOrders() {
   const { t } = useTranslation()
   const auth = useAuth()
+  const { showToast } = useToast()
   const [workOrders, setWorkOrders] = useState<any[]>([])
   const [customerMap, setCustomerMap] = useState<Record<string, string>>({})
   const [vehicleMap, setVehicleMap] = useState<Record<string, string>>({})
@@ -56,6 +58,17 @@ function WorkOrders() {
       console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(t('common.deleteConfirm'))) return
+    try {
+      await apiClient.delete(`/v1/workorders/${id}`)
+      showToast('success', t('common.deleteSuccess'))
+      fetchAll()
+    } catch (err: any) {
+      showToast('error', err.message || t('common.deleteError'))
     }
   }
 
@@ -189,10 +202,18 @@ function WorkOrders() {
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {wo.createdAt ? new Date(wo.createdAt).toLocaleDateString() : '-'}
                         </td>
-                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 space-x-3">
                           <Link to={`/workorders/${wo.id}`} className="text-blue-600 hover:text-blue-900">
                             {t('common.view')}
                           </Link>
+                          {wo.status !== 'COMPLETED' && wo.status !== 'CANCELED' && canManageCustomers(auth.user) && (
+                            <button
+                              onClick={() => handleDelete(wo.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              {t('common.delete')}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))

@@ -250,23 +250,10 @@ function FastIntake() {
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{t('fastIntake.title')}</h1>
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6" noValidate>
-        <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+          <h2 className="text-lg font-semibold text-blue-800 mb-4">{t('fastIntake.customerSection')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('fastIntake.licensePlate')} *
-              </label>
-              <input
-                type="text"
-                value={formData.licensePlate}
-                onChange={(e) => { setFormData({...formData, licensePlate: e.target.value.toUpperCase()}); setErrors({...errors, licensePlate: ''}) }}
-                className={inputClass('licensePlate')}
-                placeholder="34 ABC 123"
-              />
-              {errors.licensePlate && <p className="mt-1 text-sm text-red-600">{errors.licensePlate}</p>}
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('fastIntake.customer')} *
@@ -280,55 +267,6 @@ function FastIntake() {
               />
               {errors.customerName && <p className="mt-1 text-sm text-red-600">{errors.customerName}</p>}
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('fastIntake.make')} *
-              </label>
-              <input
-                type="text"
-                value={formData.make}
-                onChange={(e) => { setFormData({...formData, make: e.target.value}); setErrors({...errors, make: ''}) }}
-                className={inputClass('make')}
-                placeholder="Toyota"
-              />
-              {errors.make && <p className="mt-1 text-sm text-red-600">{errors.make}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('fastIntake.model')} *
-              </label>
-              <input
-                type="text"
-                value={formData.model}
-                onChange={(e) => { setFormData({...formData, model: e.target.value}); setErrors({...errors, model: ''}) }}
-                className={inputClass('model')}
-                placeholder="Corolla"
-              />
-              {errors.model && <p className="mt-1 text-sm text-red-600">{errors.model}</p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('fastIntake.year')}
-              </label>
-              <input
-                type="number"
-                value={formData.year}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormData({...formData, year: e.target.value.replace(/[^0-9]/g, '').slice(0, 4)}); setErrors({...errors, year: ''}) }}
-                className={inputClass('year')}
-                placeholder="2020"
-                min="1950"
-                max="2100"
-              />
-              {errors.year && <p className="mt-1 text-sm text-red-600">{errors.year}</p>}
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('fastIntake.phone')}
@@ -346,7 +284,6 @@ function FastIntake() {
               />
               {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('fastIntake.email')}
@@ -361,8 +298,65 @@ function FastIntake() {
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+          <h2 className="text-lg font-semibold text-green-800 mb-4">{t('fastIntake.vehicleSection')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.licensePlate')} *
+              </label>
+              <input
+                type="text"
+                value={formData.licensePlate}
+                onChange={(e) => { setFormData({...formData, licensePlate: e.target.value.toUpperCase()}); setErrors({...errors, licensePlate: ''}) }}
+                className={inputClass('licensePlate')}
+                placeholder="34 ABC 123"
+              />
+              {errors.licensePlate && <p className="mt-1 text-sm text-red-600">{errors.licensePlate}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.make')} *
+              </label>
+              <input
+                type="text"
+                value={formData.make}
+                onChange={(e) => { setFormData({...formData, make: e.target.value}); setErrors({...errors, make: ''}) }}
+                className={inputClass('make')}
+                placeholder="Toyota"
+              />
+              {errors.make && <p className="mt-1 text-sm text-red-600">{errors.make}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.model')} *
+              </label>
+              <input
+                type="text"
+                value={formData.model}
+                onChange={(e) => { setFormData({...formData, model: e.target.value}); setErrors({...errors, model: ''}) }}
+                className={inputClass('model')}
+                placeholder="Corolla"
+              />
+              {errors.model && <p className="mt-1 text-sm text-red-600">{errors.model}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.year')}
+              </label>
+              <input
+                type="number"
+                value={formData.year}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormData({...formData, year: e.target.value.replace(/[^0-9]/g, '').slice(0, 4)}); setErrors({...errors, year: ''}) }}
+                className={inputClass('year')}
+                placeholder="2020"
+                min="1950"
+                max="2100"
+              />
+              {errors.year && <p className="mt-1 text-sm text-red-600">{errors.year}</p>}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('fastIntake.mileage')}
@@ -377,7 +371,6 @@ function FastIntake() {
               />
               {errors.mileage && <p className="mt-1 text-sm text-red-600">{errors.mileage}</p>}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('fastIntake.color')}
@@ -390,7 +383,6 @@ function FastIntake() {
                 placeholder={t('fastIntake.colorPlaceholder')}
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('fastIntake.vin')}
@@ -405,8 +397,11 @@ function FastIntake() {
               />
             </div>
           </div>
+        </div>
 
-          <div className="border-t pt-4 mt-2">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
+          <h2 className="text-lg font-semibold text-orange-800 mb-4">{t('fastIntake.workOrderSection')}</h2>
+          <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">{t('fastIntake.partsSection')}</h3>
             {renderPartGroup('maintenance', PART_CATEGORIES.maintenance)}
             {renderPartGroup('issues', PART_CATEGORIES.issues)}

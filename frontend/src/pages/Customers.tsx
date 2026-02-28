@@ -52,6 +52,17 @@ function Customers() {
     }
   }
 
+  const handleDeleteCustomer = async (id: string) => {
+    if (!window.confirm(t('common.deleteConfirm'))) return
+    try {
+      await apiClient.delete(`/v1/customers/${id}`)
+      showToast('success', t('common.deleteSuccess'))
+      fetchCustomers()
+    } catch (err: any) {
+      showToast('error', err.message || t('common.deleteError'))
+    }
+  }
+
   const validateAdd = (): boolean => {
     const errs: Record<string, string> = {}
     const name = addForm.fullName.trim()
@@ -247,10 +258,18 @@ function Customers() {
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {t(`customerType.${customer.type}`, customer.type)}
                         </td>
-                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 space-x-3">
                           <Link to={`/customers/${customer.id}`} className="text-blue-600 hover:text-blue-900">
                             {t('common.view')}
                           </Link>
+                          {canManageCustomers(auth.user) && (
+                            <button
+                              onClick={() => handleDeleteCustomer(customer.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              {t('common.delete')}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))

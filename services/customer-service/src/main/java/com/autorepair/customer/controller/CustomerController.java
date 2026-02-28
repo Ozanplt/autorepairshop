@@ -81,6 +81,22 @@ public class CustomerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        UUID tenantId = TenantContext.getTenantId();
+        return customerRepository.findById(id)
+                .filter(c -> !c.isDeleted())
+                .filter(c -> tenantId == null || c.getTenantId().equals(tenantId))
+                .map(c -> {
+                    c.setDeleted(true);
+                    c.setDeletedAt(Instant.now());
+                    c.setUpdatedAt(Instant.now());
+                    customerRepository.save(c);
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     private CustomerResponse toResponse(Customer c) {
         return CustomerResponse.builder()
                 .id(c.getId())

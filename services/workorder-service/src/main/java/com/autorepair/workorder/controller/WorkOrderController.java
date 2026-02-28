@@ -49,4 +49,10 @@ public class WorkOrderController {
         }
         return ResponseEntity.ok(workOrderService.updateStatus(id, newStatus));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        workOrderService.deleteWorkOrder(id);
+        return ResponseEntity.noContent().build();
+    }
 }

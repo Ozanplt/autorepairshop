@@ -76,6 +76,22 @@ public class VehicleController {
         return ResponseEntity.ok(page.map(this::toResponse));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        UUID tenantId = TenantContext.getTenantId();
+        return vehicleRepository.findById(id)
+                .filter(v -> !v.isDeleted())
+                .filter(v -> tenantId == null || v.getTenantId().equals(tenantId))
+                .map(v -> {
+                    v.setDeleted(true);
+                    v.setDeletedAt(Instant.now());
+                    v.setUpdatedAt(Instant.now());
+                    vehicleRepository.save(v);
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     private VehicleResponse toResponse(Vehicle v) {
         return VehicleResponse.builder()
                 .id(v.getId())
