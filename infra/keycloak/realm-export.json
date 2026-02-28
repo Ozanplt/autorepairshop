@@ -22,6 +22,8 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
+      "defaultClientScopes": ["openid", "profile", "email", "roles", "web-origins", "tenant-claims"],
+      "optionalClientScopes": ["address", "phone", "offline_access", "microprofile-jwt"],
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
