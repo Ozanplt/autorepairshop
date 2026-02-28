@@ -17,7 +17,8 @@ function Vehicles() {
     try {
       const params = searchPlate ? { plate: searchPlate } : {}
       const response = await apiClient.get('/v1/vehicles', { params })
-      setVehicles(response.data.content || [])
+      const data = response.data
+      setVehicles(Array.isArray(data) ? data : (data?.content || []))
     } catch (error) {
       console.error('Failed to fetch vehicles:', error)
     } finally {

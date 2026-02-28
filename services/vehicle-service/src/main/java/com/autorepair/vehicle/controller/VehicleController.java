@@ -1,15 +1,20 @@
 package com.autorepair.vehicle.controller;
 
 import com.autorepair.common.security.TenantContext;
+import com.autorepair.vehicle.dto.CreateVehicleRequest;
 import com.autorepair.vehicle.dto.VehicleResponse;
 import com.autorepair.vehicle.entity.Vehicle;
 import com.autorepair.vehicle.repository.VehicleRepository;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.Locale;
 import java.util.UUID;
 
 @RestController
@@ -20,6 +25,35 @@ public class VehicleController {
 
     public VehicleController(VehicleRepository vehicleRepository) {
         this.vehicleRepository = vehicleRepository;
+    }
+
+    @PostMapping
+    public ResponseEntity<VehicleResponse> create(@Valid @RequestBody CreateVehicleRequest request) {
+        UUID tenantId = TenantContext.getTenantId();
+        UUID branchId = TenantContext.getBranchId();
+        String userId = TenantContext.getUserId();
+
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(UUID.randomUUID());
+        vehicle.setTenantId(tenantId != null ? tenantId : UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        vehicle.setBranchId(branchId);
+        vehicle.setCustomerId(request.getCustomerId());
+        vehicle.setRawPlate(request.getRawPlate().trim());
+        vehicle.setNormalizedPlate(normalizePlate(request.getRawPlate()));
+        vehicle.setMake(request.getMake().trim());
+        vehicle.setModel(request.getModel() != null ? request.getModel().trim() : null);
+        vehicle.setYear(request.getYear());
+        vehicle.setVin(request.getVin());
+        vehicle.setColor(request.getColor());
+        vehicle.setNotes(request.getNotes());
+        vehicle.setStatus("ACTIVE");
+        vehicle.setCreatedAt(Instant.now());
+        vehicle.setUpdatedAt(Instant.now());
+        vehicle.setCreatedByUserId(userId != null ? UUID.fromString(userId) : null);
+
+        vehicleRepository.save(vehicle);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(vehicle));
     }
 
     @GetMapping
@@ -37,7 +71,11 @@ public class VehicleController {
                     ? vehicleRepository.findByTenantIdAndIsDeletedFalse(tenantId, pageable)
                     : vehicleRepository.findByIsDeletedFalse(pageable);
         }
-        return ResponseEntity.ok(page.map(v -> VehicleResponse.builder()
+        return ResponseEntity.ok(page.map(this::toResponse));
+    }
+
+    private VehicleResponse toResponse(Vehicle v) {
+        return VehicleResponse.builder()
                 .id(v.getId())
                 .tenantId(v.getTenantId())
                 .customerId(v.getCustomerId())
@@ -50,6 +88,13 @@ public class VehicleController {
                 .color(v.getColor())
                 .status(v.getStatus())
                 .createdAt(v.getCreatedAt())
-                .build()));
+                .build();
+    }
+
+    private String normalizePlate(String raw) {
+        if (raw == null) return null;
+        String upper = raw.trim().toUpperCase(Locale.ROOT);
+        String cleaned = upper.replaceAll("[^A-Z0-9]", "");
+        return cleaned.length() >= 2 ? cleaned : raw.trim().toUpperCase(Locale.ROOT);
     }
 }

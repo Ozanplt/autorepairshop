@@ -4,6 +4,24 @@ import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/client'
 import { useToast } from '../components/Toast'
 
+const PART_CATEGORIES = {
+  maintenance: [
+    'oil_filter', 'air_filter', 'cabin_filter', 'fuel_filter',
+    'spark_plug', 'brake_pad', 'brake_disc', 'timing_belt',
+    'serpentine_belt', 'coolant', 'transmission_fluid', 'battery'
+  ],
+  issues: [
+    'engine', 'transmission', 'suspension', 'steering',
+    'electrical', 'ac_system', 'exhaust', 'fuel_system',
+    'cooling_system', 'brakes', 'clutch', 'turbo'
+  ],
+  replacements: [
+    'windshield', 'headlight', 'taillight', 'mirror',
+    'bumper', 'fender', 'door', 'hood',
+    'tire', 'wheel', 'wiper_blade', 'muffler'
+  ]
+}
+
 function FastIntake() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -15,11 +33,27 @@ function FastIntake() {
     email: '',
     make: '',
     model: '',
-    problem: ''
+    problem: '',
+    problemDetails: ''
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [selectedParts, setSelectedParts] = useState<Record<string, string[]>>({
+    maintenance: [],
+    issues: [],
+    replacements: []
+  })
+
+  const togglePart = (category: string, part: string) => {
+    setSelectedParts(prev => {
+      const current = prev[category] || []
+      const updated = current.includes(part)
+        ? current.filter(p => p !== part)
+        : [...current, part]
+      return { ...prev, [category]: updated }
+    })
+  }
 
   const validate = (): boolean => {
     const errs: Record<string, string> = {}
@@ -53,15 +87,43 @@ function FastIntake() {
       }
     }
 
-    const problemTrimmed = formData.problem.trim()
-    if (!problemTrimmed) {
-      errs.problem = t('validation.required')
-    } else if (problemTrimmed.length < 3) {
-      errs.problem = t('validation.problemMin')
+    const makeTrimmed = formData.make.trim()
+    if (!makeTrimmed) {
+      errs.make = t('validation.required')
+    } else if (makeTrimmed.length < 2) {
+      errs.make = t('validation.makeMin')
+    }
+
+    const modelTrimmed = formData.model.trim()
+    if (!modelTrimmed) {
+      errs.model = t('validation.required')
+    } else if (modelTrimmed.length < 1) {
+      errs.model = t('validation.modelMin')
     }
 
     setErrors(errs)
     return Object.keys(errs).length === 0
+  }
+
+  const buildProblemNote = (): string => {
+    const parts: string[] = []
+
+    if (selectedParts.maintenance.length > 0) {
+      parts.push(`[${t('fastIntake.parts.maintenance')}] ${selectedParts.maintenance.map(p => t(`parts.${p}`)).join(', ')}`)
+    }
+    if (selectedParts.issues.length > 0) {
+      parts.push(`[${t('fastIntake.parts.issues')}] ${selectedParts.issues.map(p => t(`parts.${p}`)).join(', ')}`)
+    }
+    if (selectedParts.replacements.length > 0) {
+      parts.push(`[${t('fastIntake.parts.replacements')}] ${selectedParts.replacements.map(p => t(`parts.${p}`)).join(', ')}`)
+    }
+
+    const problemText = formData.problem.trim()
+    if (problemText) {
+      parts.unshift(problemText)
+    }
+
+    return parts.join(' | ')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,29 +133,53 @@ function FastIntake() {
     setLoading(true)
 
     try {
+      const customerRes = await apiClient.post('/v1/customers', {
+        fullName: formData.customerName.trim(),
+        phoneE164: formData.phone.replace(/[\s\-\(\)]/g, '') || undefined,
+        emailNormalized: formData.email || undefined,
+        type: 'GUEST'
+      }, {
+        headers: { 'Idempotency-Key': crypto.randomUUID() }
+      })
+      const customerId = customerRes.data.id
+
+      const vehicleRes = await apiClient.post('/v1/vehicles', {
+        customerId,
+        rawPlate: formData.licensePlate.trim(),
+        make: formData.make.trim(),
+        model: formData.model.trim() || undefined
+      }, {
+        headers: { 'Idempotency-Key': crypto.randomUUID() }
+      })
+      const vehicleId = vehicleRes.data.id
+
+      const problemNote = buildProblemNote()
+
       await apiClient.post('/v1/workorders/fast-intake', {
         customer: {
           fullName: formData.customerName.trim(),
           phoneE164: formData.phone.replace(/[\s\-\(\)]/g, '') || undefined,
-          email: formData.email || undefined
+          email: formData.email || undefined,
+          customerId
         },
         vehicle: {
           rawPlate: formData.licensePlate.trim(),
-          make: formData.make || undefined,
-          model: formData.model || undefined
+          make: formData.make.trim(),
+          model: formData.model.trim() || undefined,
+          vehicleId
         },
         workOrder: {
-          problemShortNote: formData.problem.trim()
+          problemShortNote: problemNote || undefined,
+          problemDetails: formData.problemDetails.trim() || undefined
         }
       }, {
-        headers: {
-          'Idempotency-Key': crypto.randomUUID()
-        }
+        headers: { 'Idempotency-Key': crypto.randomUUID() }
       })
 
       showToast('success', t('fastIntake.success'))
-      setFormData({ licensePlate: '', customerName: '', phone: '', email: '', make: '', model: '', problem: '' })
+      setFormData({ licensePlate: '', customerName: '', phone: '', email: '', make: '', model: '', problem: '', problemDetails: '' })
       setErrors({})
+      setSelectedParts({ maintenance: [], issues: [], replacements: [] })
       navigate('/workorders')
     } catch (err: any) {
       showToast('error', err.message || t('fastIntake.error'))
@@ -107,84 +193,142 @@ function FastIntake() {
       errors[field] ? 'border-red-400 bg-red-50' : 'border-gray-300'
     }`
 
+  const renderPartGroup = (category: string, parts: string[]) => (
+    <div key={category} className="mb-4">
+      <h4 className="text-sm font-semibold text-gray-700 mb-2">
+        {t(`fastIntake.parts.${category}`)}
+      </h4>
+      <div className="flex flex-wrap gap-2">
+        {parts.map(part => {
+          const isSelected = (selectedParts[category] || []).includes(part)
+          return (
+            <button
+              key={part}
+              type="button"
+              onClick={() => togglePart(category, part)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                isSelected
+                  ? category === 'maintenance'
+                    ? 'bg-green-100 text-green-800 border-2 border-green-400'
+                    : category === 'issues'
+                    ? 'bg-red-100 text-red-800 border-2 border-red-400'
+                    : 'bg-blue-100 text-blue-800 border-2 border-blue-400'
+                  : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+              }`}
+            >
+              {isSelected ? '✓ ' : ''}{t(`parts.${part}`)}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{t('fastIntake.title')}</h1>
       
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6" noValidate>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('fastIntake.licensePlate')} *
-            </label>
-            <input
-              type="text"
-              value={formData.licensePlate}
-              onChange={(e) => { setFormData({...formData, licensePlate: e.target.value.toUpperCase()}); setErrors({...errors, licensePlate: ''}) }}
-              className={inputClass('licensePlate')}
-              placeholder="34 ABC 123"
-            />
-            {errors.licensePlate && <p className="mt-1 text-sm text-red-600">{errors.licensePlate}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.licensePlate')} *
+              </label>
+              <input
+                type="text"
+                value={formData.licensePlate}
+                onChange={(e) => { setFormData({...formData, licensePlate: e.target.value.toUpperCase()}); setErrors({...errors, licensePlate: ''}) }}
+                className={inputClass('licensePlate')}
+                placeholder="34 ABC 123"
+              />
+              {errors.licensePlate && <p className="mt-1 text-sm text-red-600">{errors.licensePlate}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.customer')} *
+              </label>
+              <input
+                type="text"
+                value={formData.customerName}
+                onChange={(e) => { setFormData({...formData, customerName: e.target.value}); setErrors({...errors, customerName: ''}) }}
+                className={inputClass('customerName')}
+                placeholder="Ahmet Yılmaz"
+              />
+              {errors.customerName && <p className="mt-1 text-sm text-red-600">{errors.customerName}</p>}
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('fastIntake.customer')} *
-            </label>
-            <input
-              type="text"
-              value={formData.customerName}
-              onChange={(e) => { setFormData({...formData, customerName: e.target.value}); setErrors({...errors, customerName: ''}) }}
-              className={inputClass('customerName')}
-              placeholder="Ahmet Yılmaz"
-            />
-            {errors.customerName && <p className="mt-1 text-sm text-red-600">{errors.customerName}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.make')} *
+              </label>
+              <input
+                type="text"
+                value={formData.make}
+                onChange={(e) => { setFormData({...formData, make: e.target.value}); setErrors({...errors, make: ''}) }}
+                className={inputClass('make')}
+                placeholder="Toyota"
+              />
+              {errors.make && <p className="mt-1 text-sm text-red-600">{errors.make}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.model')} *
+              </label>
+              <input
+                type="text"
+                value={formData.model}
+                onChange={(e) => { setFormData({...formData, model: e.target.value}); setErrors({...errors, model: ''}) }}
+                className={inputClass('model')}
+                placeholder="Corolla"
+              />
+              {errors.model && <p className="mt-1 text-sm text-red-600">{errors.model}</p>}
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('fastIntake.phone')}
-            </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => {
-                const val = e.target.value.replace(/[^0-9+\s\-\(\)]/g, '')
-                setFormData({...formData, phone: val})
-                setErrors({...errors, phone: ''})
-              }}
-              className={inputClass('phone')}
-              placeholder="+90 555 123 4567"
-            />
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.phone')}
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9+\s\-\(\)]/g, '')
+                  setFormData({...formData, phone: val})
+                  setErrors({...errors, phone: ''})
+                }}
+                className={inputClass('phone')}
+                placeholder="+90 555 123 4567"
+              />
+              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.email')}
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => { setFormData({...formData, email: e.target.value}); setErrors({...errors, email: ''}) }}
+                className={inputClass('email')}
+                placeholder="ornek@email.com"
+              />
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('fastIntake.email')}
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => { setFormData({...formData, email: e.target.value}); setErrors({...errors, email: ''}) }}
-              className={inputClass('email')}
-              placeholder="ornek@email.com"
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('fastIntake.problem')} *
-            </label>
-            <textarea
-              value={formData.problem}
-              onChange={(e) => { setFormData({...formData, problem: e.target.value}); setErrors({...errors, problem: ''}) }}
-              className={inputClass('problem')}
-              rows={3}
-              placeholder={t('fastIntake.problemPlaceholder')}
-            />
-            {errors.problem && <p className="mt-1 text-sm text-red-600">{errors.problem}</p>}
+          <div className="border-t pt-4 mt-2">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">{t('fastIntake.partsSection')}</h3>
+            {renderPartGroup('maintenance', PART_CATEGORIES.maintenance)}
+            {renderPartGroup('issues', PART_CATEGORIES.issues)}
+            {renderPartGroup('replacements', PART_CATEGORIES.replacements)}
           </div>
 
           <button
@@ -199,27 +343,27 @@ function FastIntake() {
             <div className="space-y-4 pt-4 border-t">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('fastIntake.make')}
+                  {t('fastIntake.problem')}
                 </label>
-                <input
-                  type="text"
-                  value={formData.make}
-                  onChange={(e) => setFormData({...formData, make: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Toyota"
+                <textarea
+                  value={formData.problem}
+                  onChange={(e) => { setFormData({...formData, problem: e.target.value}); setErrors({...errors, problem: ''}) }}
+                  className={inputClass('problem')}
+                  rows={3}
+                  placeholder={t('fastIntake.problemPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('fastIntake.model')}
+                  {t('fastIntake.problemDetails')}
                 </label>
-                <input
-                  type="text"
-                  value={formData.model}
-                  onChange={(e) => setFormData({...formData, model: e.target.value})}
+                <textarea
+                  value={formData.problemDetails}
+                  onChange={(e) => setFormData({...formData, problemDetails: e.target.value})}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Corolla"
+                  rows={4}
+                  placeholder={t('fastIntake.problemDetailsPlaceholder')}
                 />
               </div>
             </div>

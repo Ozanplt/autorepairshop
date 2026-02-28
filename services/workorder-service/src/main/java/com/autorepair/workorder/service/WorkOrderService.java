@@ -27,14 +27,25 @@ public class WorkOrderService {
         UUID tenantId = TenantContext.getTenantId();
         UUID branchId = TenantContext.getBranchId();
 
+        UUID customerId = null;
+        if (request.getCustomer() != null && request.getCustomer().getCustomerId() != null) {
+            customerId = UUID.fromString(request.getCustomer().getCustomerId());
+        }
+
+        UUID vehicleId = null;
+        if (request.getVehicle() != null && request.getVehicle().getVehicleId() != null) {
+            vehicleId = UUID.fromString(request.getVehicle().getVehicleId());
+        }
+
         WorkOrder wo = new WorkOrder();
         wo.setId(UUID.randomUUID());
-        wo.setTenantId(tenantId != null ? tenantId : UUID.randomUUID());
+        wo.setTenantId(tenantId != null ? tenantId : UUID.fromString("00000000-0000-0000-0000-000000000001"));
         wo.setBranchId(branchId);
-        wo.setCustomerId(UUID.randomUUID());
-        wo.setVehicleId(UUID.randomUUID());
+        wo.setCustomerId(customerId != null ? customerId : UUID.randomUUID());
+        wo.setVehicleId(vehicleId != null ? vehicleId : UUID.randomUUID());
         wo.setStatus("INTAKE");
         wo.setProblemShortNote(request.getWorkOrder() != null ? request.getWorkOrder().getProblemShortNote() : null);
+        wo.setProblemDetails(request.getWorkOrder() != null ? request.getWorkOrder().getProblemDetails() : null);
         wo.setCreatedAt(Instant.now());
         wo.setUpdatedAt(Instant.now());
 

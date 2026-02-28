@@ -12,6 +12,8 @@ public class FastIntakeRequest {
     public static class CustomerData {
         private String fullName;
         private String phoneE164;
+        private String email;
+        private String customerId;
     }
 
     @Data
@@ -19,10 +21,12 @@ public class FastIntakeRequest {
         private String rawPlate;
         private String make;
         private String model;
+        private String vehicleId;
     }
 
     @Data
     public static class WorkOrderData {
         private String problemShortNote;
+        private String problemDetails;
     }
 }
