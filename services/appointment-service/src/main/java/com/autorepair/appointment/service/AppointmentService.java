@@ -32,7 +32,7 @@ public class AppointmentService {
         appointment.setCustomerId(request.getCustomerId());
         appointment.setVehicleId(request.getVehicleId());
         appointment.setWorkOrderId(request.getWorkOrderId());
-        appointment.setTitle(request.getTitle().trim());
+        appointment.setTitle(request.getTitle() != null ? request.getTitle().trim() : null);
         appointment.setDescription(request.getDescription());
         appointment.setAppointmentDate(request.getAppointmentDate());
         appointment.setStartTime(request.getStartTime());

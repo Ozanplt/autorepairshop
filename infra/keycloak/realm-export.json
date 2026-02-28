@@ -11,144 +11,8 @@
   "internationalizationEnabled": true,
   "supportedLocales": ["en", "tr"],
   "defaultLocale": "tr",
-  "clients": [
-    {
-      "clientId": "frontend",
-      "enabled": true,
-      "publicClient": true,
-      "redirectUris": ["http://localhost:5173/*", "http://localhost:3000/*"],
-      "webOrigins": ["http://localhost:5173", "http://localhost:3000"],
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "protocol": "openid-connect",
-      "defaultClientScopes": ["openid", "profile", "email", "roles", "web-origins", "tenant-claims"],
-      "optionalClientScopes": ["address", "phone", "offline_access", "microprofile-jwt"],
-      "attributes": {
-        "pkce.code.challenge.method": "S256"
-      }
-    },
-    {
-      "clientId": "gateway-service",
-      "enabled": true,
-      "publicClient": false,
-      "secret": "gateway-secret-change-in-prod",
-      "serviceAccountsEnabled": true,
-      "standardFlowEnabled": false,
-      "directAccessGrantsEnabled": false
-    },
-    {
-      "clientId": "svc-tenantadmin",
-      "enabled": true,
-      "publicClient": false,
-      "secret": "svc-tenantadmin-secret",
-      "serviceAccountsEnabled": true,
-      "standardFlowEnabled": false
-    },
-    {
-      "clientId": "svc-customer",
-      "enabled": true,
-      "publicClient": false,
-      "secret": "svc-customer-secret",
-      "serviceAccountsEnabled": true,
-      "standardFlowEnabled": false
-    }
-  ],
-  "roles": {
-    "realm": [
-      {"name": "OWNER"},
-      {"name": "ADMIN"},
-      {"name": "STAFF"},
-      {"name": "MECHANIC"},
-      {"name": "CUSTOMER"}
-    ]
-  },
-  "users": [
-    {
-      "username": "owner@demo.com",
-      "email": "owner@demo.com",
-      "firstName": "Owner",
-      "lastName": "Demo",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
-      "realmRoles": ["OWNER", "default-roles-autorepairshop"],
-      "attributes": {
-        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
-        "branch_id": ["00000000-0000-0000-0000-000000000010"]
-      }
-    },
-    {
-      "username": "admin@demo.com",
-      "email": "admin@demo.com",
-      "firstName": "Admin",
-      "lastName": "Demo",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
-      "realmRoles": ["ADMIN", "default-roles-autorepairshop"],
-      "attributes": {
-        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
-        "branch_id": ["00000000-0000-0000-0000-000000000010"]
-      }
-    },
-    {
-      "username": "mechanic@demo.com",
-      "email": "mechanic@demo.com",
-      "firstName": "Mechanic",
-      "lastName": "Demo",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
-      "realmRoles": ["MECHANIC", "default-roles-autorepairshop"],
-      "attributes": {
-        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
-        "branch_id": ["00000000-0000-0000-0000-000000000010"]
-      }
-    },
-    {
-      "username": "staff@demo.com",
-      "email": "staff@demo.com",
-      "firstName": "Staff",
-      "lastName": "Demo",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
-      "realmRoles": ["STAFF", "default-roles-autorepairshop"],
-      "attributes": {
-        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
-        "branch_id": ["00000000-0000-0000-0000-000000000010"]
-      }
-    },
-    {
-      "username": "owner2@demo.com",
-      "email": "owner2@demo.com",
-      "firstName": "Owner2",
-      "lastName": "Demo",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
-      "realmRoles": ["OWNER", "default-roles-autorepairshop"],
-      "attributes": {
-        "tenant_id": ["00000000-0000-0000-0000-000000000002"],
-        "branch_id": ["00000000-0000-0000-0000-000000000020"]
-      }
-    },
-    {
-      "username": "admin2@demo.com",
-      "email": "admin2@demo.com",
-      "firstName": "Admin2",
-      "lastName": "Demo",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
-      "realmRoles": ["ADMIN", "default-roles-autorepairshop"],
-      "attributes": {
-        "tenant_id": ["00000000-0000-0000-0000-000000000002"],
-        "branch_id": ["00000000-0000-0000-0000-000000000020"]
-      }
-    }
-  ],
+  "loginTheme": "keycloak",
+  "accountTheme": "keycloak.v2",
   "clientScopes": [
     {
       "name": "openid",
@@ -391,5 +255,143 @@
     }
   ],
   "defaultDefaultClientScopes": ["openid", "profile", "email", "roles", "web-origins", "tenant-claims"],
-  "defaultOptionalClientScopes": ["offline_access"]
+  "defaultOptionalClientScopes": ["offline_access"],
+  "clients": [
+    {
+      "clientId": "frontend",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": ["http://localhost:5173/*", "http://localhost:3000/*"],
+      "webOrigins": ["http://localhost:5173", "http://localhost:3000"],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect",
+      "defaultClientScopes": ["openid", "profile", "email", "roles", "web-origins", "tenant-claims"],
+      "optionalClientScopes": ["offline_access"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "gateway-service",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "gateway-secret-change-in-prod",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "svc-tenantadmin",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "svc-tenantadmin-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false
+    },
+    {
+      "clientId": "svc-customer",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "svc-customer-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false
+    }
+  ],
+  "roles": {
+    "realm": [
+      {"name": "OWNER"},
+      {"name": "ADMIN"},
+      {"name": "STAFF"},
+      {"name": "MECHANIC"},
+      {"name": "CUSTOMER"}
+    ]
+  },
+  "users": [
+    {
+      "username": "owner@demo.com",
+      "email": "owner@demo.com",
+      "firstName": "Owner",
+      "lastName": "Demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["OWNER", "default-roles-autorepairshop"],
+      "attributes": {
+        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
+        "branch_id": ["00000000-0000-0000-0000-000000000010"]
+      }
+    },
+    {
+      "username": "admin@demo.com",
+      "email": "admin@demo.com",
+      "firstName": "Admin",
+      "lastName": "Demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["ADMIN", "default-roles-autorepairshop"],
+      "attributes": {
+        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
+        "branch_id": ["00000000-0000-0000-0000-000000000010"]
+      }
+    },
+    {
+      "username": "mechanic@demo.com",
+      "email": "mechanic@demo.com",
+      "firstName": "Mechanic",
+      "lastName": "Demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["MECHANIC", "default-roles-autorepairshop"],
+      "attributes": {
+        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
+        "branch_id": ["00000000-0000-0000-0000-000000000010"]
+      }
+    },
+    {
+      "username": "staff@demo.com",
+      "email": "staff@demo.com",
+      "firstName": "Staff",
+      "lastName": "Demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["STAFF", "default-roles-autorepairshop"],
+      "attributes": {
+        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
+        "branch_id": ["00000000-0000-0000-0000-000000000010"]
+      }
+    },
+    {
+      "username": "owner2@demo.com",
+      "email": "owner2@demo.com",
+      "firstName": "Owner2",
+      "lastName": "Demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["OWNER", "default-roles-autorepairshop"],
+      "attributes": {
+        "tenant_id": ["00000000-0000-0000-0000-000000000002"],
+        "branch_id": ["00000000-0000-0000-0000-000000000020"]
+      }
+    },
+    {
+      "username": "admin2@demo.com",
+      "email": "admin2@demo.com",
+      "firstName": "Admin2",
+      "lastName": "Demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["ADMIN", "default-roles-autorepairshop"],
+      "attributes": {
+        "tenant_id": ["00000000-0000-0000-0000-000000000002"],
+        "branch_id": ["00000000-0000-0000-0000-000000000020"]
+      }
+    }
+  ]
 }

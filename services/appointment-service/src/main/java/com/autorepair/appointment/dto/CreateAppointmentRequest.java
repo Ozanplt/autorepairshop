@@ -1,6 +1,5 @@
 package com.autorepair.appointment.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -18,7 +17,6 @@ public class CreateAppointmentRequest {
 
     private UUID workOrderId;
 
-    @NotBlank
     private String title;
 
     private String description;
