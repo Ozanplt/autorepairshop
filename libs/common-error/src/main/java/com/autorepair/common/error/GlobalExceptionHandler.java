@@ -7,6 +7,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.autorepair.common.security.exception.ResourceNotFoundException;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +35,32 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .errorId(UUID.randomUUID().toString())
+                .errorCode(ErrorCode.ERR_RESOURCE_NOT_FOUND)
+                .message(ex.getMessage())
+                .messageKey("error.resource.not.found")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .errorId(UUID.randomUUID().toString())
+                .errorCode(ErrorCode.ERR_RESOURCE_CONFLICT)
+                .message(ex.getMessage())
+                .messageKey("error.resource.conflict")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(BusinessException.class)
