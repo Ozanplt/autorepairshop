@@ -1,5 +1,11 @@
 import axios from 'axios'
 
+let _accessToken: string | null = null
+
+export function setAccessToken(token: string | null) {
+  _accessToken = token
+}
+
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
@@ -10,9 +16,8 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem('access_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (_accessToken) {
+      config.headers.Authorization = `Bearer ${_accessToken}`
     }
     
     config.headers['X-Request-Id'] = crypto.randomUUID()

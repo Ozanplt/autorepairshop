@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { setAccessToken } from './api/client'
 import Login from './pages/Login'
 import FastIntake from './pages/FastIntake'
 import WorkOrders from './pages/WorkOrders'
@@ -15,12 +17,20 @@ import Layout from './components/Layout'
 function App() {
   const auth = useAuth()
 
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.user?.access_token) {
+      setAccessToken(auth.user.access_token)
+    } else {
+      setAccessToken(null)
+    }
+  }, [auth.isAuthenticated, auth.user?.access_token])
+
   if (auth.isLoading) {
-    return <div>Loading...</div>
+    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>
   }
 
   if (auth.error) {
-    return <div>Authentication Error: {auth.error.message}</div>
+    return <div className="min-h-screen flex items-center justify-center bg-gray-100"><div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg">Authentication Error: {auth.error.message}</div></div>
   }
 
   if (!auth.isAuthenticated) {
