@@ -239,13 +239,13 @@ function Customers() {
                           {customer.fullName}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {customer.phoneE164 || 'N/A'}
+                          {customer.phoneE164 || '-'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {customer.emailNormalized || 'N/A'}
+                          {customer.emailNormalized || '-'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {customer.type}
+                          {t(`customerType.${customer.type}`, customer.type)}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <Link to={`/customers/${customer.id}`} className="text-blue-600 hover:text-blue-900">

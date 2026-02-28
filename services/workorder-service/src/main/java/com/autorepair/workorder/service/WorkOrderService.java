@@ -43,7 +43,7 @@ public class WorkOrderService {
         wo.setBranchId(branchId);
         wo.setCustomerId(customerId != null ? customerId : UUID.randomUUID());
         wo.setVehicleId(vehicleId != null ? vehicleId : UUID.randomUUID());
-        wo.setStatus("INTAKE");
+        wo.setStatus("DRAFT");
         wo.setProblemShortNote(request.getWorkOrder() != null ? request.getWorkOrder().getProblemShortNote() : null);
         wo.setProblemDetails(request.getWorkOrder() != null ? request.getWorkOrder().getProblemDetails() : null);
         wo.setCreatedAt(Instant.now());
@@ -82,6 +82,7 @@ public class WorkOrderService {
                 .status(wo.getStatus())
                 .subStatus(wo.getSubStatus())
                 .problemShortNote(wo.getProblemShortNote())
+                .problemDetails(wo.getProblemDetails())
                 .createdAt(wo.getCreatedAt())
                 .updatedAt(wo.getUpdatedAt())
                 .build());
@@ -89,7 +90,9 @@ public class WorkOrderService {
 
     @Transactional(readOnly = true)
     public WorkOrderResponse getWorkOrder(UUID id) {
+        UUID tenantId = TenantContext.getTenantId();
         WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
+                .filter(w -> tenantId == null || w.getTenantId().equals(tenantId))
                 .orElseThrow(() -> new RuntimeException("Work order not found"));
         return WorkOrderResponse.builder()
                 .id(wo.getId())
@@ -99,6 +102,7 @@ public class WorkOrderService {
                 .status(wo.getStatus())
                 .subStatus(wo.getSubStatus())
                 .problemShortNote(wo.getProblemShortNote())
+                .problemDetails(wo.getProblemDetails())
                 .createdAt(wo.getCreatedAt())
                 .updatedAt(wo.getUpdatedAt())
                 .build();

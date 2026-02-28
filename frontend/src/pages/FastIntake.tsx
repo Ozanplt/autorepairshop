@@ -33,6 +33,7 @@ function FastIntake() {
     email: '',
     make: '',
     model: '',
+    year: '',
     problem: '',
     problemDetails: ''
   })
@@ -101,6 +102,13 @@ function FastIntake() {
       errs.model = t('validation.modelMin')
     }
 
+    if (formData.year) {
+      const yearNum = parseInt(formData.year, 10)
+      if (isNaN(yearNum) || yearNum < 1950 || yearNum > 2100) {
+        errs.year = t('validation.yearInvalid')
+      }
+    }
+
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -147,7 +155,8 @@ function FastIntake() {
         customerId,
         rawPlate: formData.licensePlate.trim(),
         make: formData.make.trim(),
-        model: formData.model.trim() || undefined
+        model: formData.model.trim() || undefined,
+        year: formData.year ? parseInt(formData.year, 10) : undefined
       }, {
         headers: { 'Idempotency-Key': crypto.randomUUID() }
       })
@@ -177,7 +186,7 @@ function FastIntake() {
       })
 
       showToast('success', t('fastIntake.success'))
-      setFormData({ licensePlate: '', customerName: '', phone: '', email: '', make: '', model: '', problem: '', problemDetails: '' })
+      setFormData({ licensePlate: '', customerName: '', phone: '', email: '', make: '', model: '', year: '', problem: '', problemDetails: '' })
       setErrors({})
       setSelectedParts({ maintenance: [], issues: [], replacements: [] })
       navigate('/workorders')
@@ -290,7 +299,23 @@ function FastIntake() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.year')}
+              </label>
+              <input
+                type="number"
+                value={formData.year}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormData({...formData, year: e.target.value.replace(/[^0-9]/g, '').slice(0, 4)}); setErrors({...errors, year: ''}) }}
+                className={inputClass('year')}
+                placeholder="2020"
+                min="1950"
+                max="2100"
+              />
+              {errors.year && <p className="mt-1 text-sm text-red-600">{errors.year}</p>}
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('fastIntake.phone')}

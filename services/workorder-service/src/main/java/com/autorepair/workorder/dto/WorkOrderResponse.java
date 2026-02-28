@@ -16,6 +16,7 @@ public class WorkOrderResponse {
     private String status;
     private String subStatus;
     private String problemShortNote;
+    private String problemDetails;
     private String customerName;
     private String vehiclePlate;
     private Instant createdAt;

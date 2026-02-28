@@ -5,10 +5,16 @@ import { useAuth } from 'react-oidc-context'
 import apiClient from '../api/client'
 import { canCreateWorkOrder } from '../auth/roles'
 
+function extractList(data: any): any[] {
+  if (Array.isArray(data)) return data
+  if (data?.content && Array.isArray(data.content)) return data.content
+  return []
+}
+
 function WorkOrders() {
   const { t } = useTranslation()
   const auth = useAuth()
-  const [workOrders, setWorkOrders] = useState([])
+  const [workOrders, setWorkOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -18,7 +24,7 @@ function WorkOrders() {
   const fetchWorkOrders = async () => {
     try {
       const response = await apiClient.get('/v1/workorders')
-      setWorkOrders(response.data.content || [])
+      setWorkOrders(extractList(response.data))
     } catch (error) {
       console.error('Failed to fetch work orders:', error)
     } finally {
@@ -31,10 +37,62 @@ function WorkOrders() {
       DRAFT: 'bg-gray-200 text-gray-800',
       OPEN: 'bg-blue-200 text-blue-800',
       IN_PROGRESS: 'bg-yellow-200 text-yellow-800',
+      WAITING_CUSTOMER_APPROVAL: 'bg-orange-200 text-orange-800',
       COMPLETED: 'bg-green-200 text-green-800',
-      CANCELED: 'bg-red-200 text-red-800'
+      CANCELED: 'bg-red-200 text-red-800',
+      INTAKE: 'bg-purple-200 text-purple-800'
     }
     return colors[status] || 'bg-gray-200 text-gray-800'
+  }
+
+  const translateStatus = (status: string): string => {
+    const key = `status.${status}`
+    const translated = t(key)
+    return translated !== key ? translated : status
+  }
+
+  const renderProblem = (note: string | null) => {
+    if (!note) return <span className="text-gray-400">-</span>
+
+    const sectionRegex = /\[([^\]]+)\]\s*([^|[\]]*)/g
+    const sections: { label: string; items: string }[] = []
+    let match
+    let hasStructured = false
+
+    while ((match = sectionRegex.exec(note)) !== null) {
+      hasStructured = true
+      sections.push({ label: match[1].trim(), items: match[2].trim() })
+    }
+
+    if (!hasStructured) {
+      return <span className="text-gray-700">{note.length > 60 ? note.substring(0, 60) + '...' : note}</span>
+    }
+
+    const freeText = note.split('|')[0]?.replace(/\[[^\]]+\][^|]*/g, '').trim()
+
+    const categoryColors: Record<string, string> = {}
+    const maintenanceLabels = [t('fastIntake.parts.maintenance'), 'Maintenance', 'Bakım']
+    const issueLabels = [t('fastIntake.parts.issues'), 'Issues', 'Sorunlar']
+    const replacementLabels = [t('fastIntake.parts.replacements'), 'Replacements', 'Değişimler']
+
+    maintenanceLabels.forEach(l => { categoryColors[l] = 'bg-green-100 text-green-700' })
+    issueLabels.forEach(l => { categoryColors[l] = 'bg-red-100 text-red-700' })
+    replacementLabels.forEach(l => { categoryColors[l] = 'bg-blue-100 text-blue-700' })
+
+    return (
+      <div className="flex flex-wrap gap-1 max-w-xs">
+        {freeText && <span className="text-gray-700 text-xs mr-1">{freeText}</span>}
+        {sections.map((s, i) => (
+          <span
+            key={i}
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${categoryColors[s.label] || 'bg-gray-100 text-gray-700'}`}
+            title={s.items}
+          >
+            {s.label}: {s.items.length > 25 ? s.items.substring(0, 25) + '...' : s.items}
+          </span>
+        ))}
+      </div>
+    )
   }
 
   if (loading) {
@@ -77,35 +135,41 @@ function WorkOrders() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {workOrders.map((wo: any) => (
-                    <tr key={wo.id}>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {wo.id.substring(0, 8)}...
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                        {wo.customerName || 'N/A'}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {wo.vehiclePlate || 'N/A'}
-                      </td>
-                      <td className="px-3 py-4 text-sm text-gray-500">
-                        {wo.problemShortNote || 'N/A'}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm">
-                        <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadge(wo.status)}`}>
-                          {wo.status}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(wo.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <Link to={`/workorders/${wo.id}`} className="text-blue-600 hover:text-blue-900">
-                          {t('common.view')}
-                        </Link>
-                      </td>
+                  {workOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-gray-500">{t('common.noData')}</td>
                     </tr>
-                  ))}
+                  ) : (
+                    workOrders.map((wo: any) => (
+                      <tr key={wo.id} className="hover:bg-gray-50">
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 font-mono">
+                          {wo.id.substring(0, 8)}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                          {wo.customerName || '-'}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 font-medium">
+                          {wo.vehiclePlate || '-'}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-500">
+                          {renderProblem(wo.problemShortNote)}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm">
+                          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusBadge(wo.status)}`}>
+                            {translateStatus(wo.status)}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {wo.createdAt ? new Date(wo.createdAt).toLocaleDateString() : '-'}
+                        </td>
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                          <Link to={`/workorders/${wo.id}`} className="text-blue-600 hover:text-blue-900">
+                            {t('common.view')}
+                          </Link>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

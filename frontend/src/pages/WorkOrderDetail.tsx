@@ -48,31 +48,40 @@ function WorkOrderDetail() {
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrders.status')}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {workOrder.status}
+                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  workOrder.status === 'DRAFT' ? 'bg-gray-200 text-gray-800' :
+                  workOrder.status === 'OPEN' ? 'bg-blue-200 text-blue-800' :
+                  workOrder.status === 'IN_PROGRESS' ? 'bg-yellow-200 text-yellow-800' :
+                  workOrder.status === 'COMPLETED' ? 'bg-green-200 text-green-800' :
+                  workOrder.status === 'CANCELED' ? 'bg-red-200 text-red-800' :
+                  'bg-gray-200 text-gray-800'
+                }`}>
+                  {t(`status.${workOrder.status}`, workOrder.status)}
+                </span>
               </dd>
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrders.customer')}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {workOrder.customerName || 'N/A'}
+                {workOrder.customerName || '-'}
               </dd>
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrders.vehicle')}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {workOrder.vehiclePlate || 'N/A'}
+                {workOrder.vehiclePlate || '-'}
               </dd>
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrders.problem')}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {workOrder.problemShortNote || 'N/A'}
+                {workOrder.problemShortNote || '-'}
               </dd>
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrderDetail.details')}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {workOrder.problemDetails || 'N/A'}
+                {workOrder.problemDetails || '-'}
               </dd>
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

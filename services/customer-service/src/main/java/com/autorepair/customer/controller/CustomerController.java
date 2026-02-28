@@ -73,8 +73,10 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponse> getById(@PathVariable UUID id) {
+        UUID tenantId = TenantContext.getTenantId();
         return customerRepository.findById(id)
                 .filter(c -> !c.isDeleted())
+                .filter(c -> tenantId == null || c.getTenantId().equals(tenantId))
                 .map(c -> ResponseEntity.ok(toResponse(c)))
                 .orElse(ResponseEntity.notFound().build());
     }

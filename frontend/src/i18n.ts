@@ -139,7 +139,19 @@ i18n
           'validation.emailInvalid': 'Invalid email format',
           'validation.problemMin': 'Problem description must be at least 3 characters',
           'validation.makeMin': 'Make must be at least 2 characters',
-          'validation.modelMin': 'Model is required'
+          'validation.modelMin': 'Model is required',
+          'validation.yearInvalid': 'Year must be between 1950 and 2100',
+          'fastIntake.year': 'Year (optional)',
+          'status.DRAFT': 'Draft',
+          'status.OPEN': 'Open',
+          'status.IN_PROGRESS': 'In Progress',
+          'status.WAITING_CUSTOMER_APPROVAL': 'Waiting Approval',
+          'status.COMPLETED': 'Completed',
+          'status.CANCELED': 'Canceled',
+          'status.INTAKE': 'Intake',
+          'customerType.GUEST': 'Guest',
+          'customerType.REGISTERED': 'Registered',
+          'common.unknown': 'Unknown'
         }
       },
       tr: {
@@ -274,7 +286,19 @@ i18n
           'validation.emailInvalid': 'Geçersiz e-posta formatı',
           'validation.problemMin': 'Sorun açıklaması en az 3 karakter olmalıdır',
           'validation.makeMin': 'Marka en az 2 karakter olmalıdır',
-          'validation.modelMin': 'Model zorunludur'
+          'validation.modelMin': 'Model zorunludur',
+          'validation.yearInvalid': 'Yıl 1950 ile 2100 arasında olmalıdır',
+          'fastIntake.year': 'Yıl (opsiyonel)',
+          'status.DRAFT': 'Taslak',
+          'status.OPEN': 'Açık',
+          'status.IN_PROGRESS': 'Devam Ediyor',
+          'status.WAITING_CUSTOMER_APPROVAL': 'Onay Bekleniyor',
+          'status.COMPLETED': 'Tamamlandı',
+          'status.CANCELED': 'İptal Edildi',
+          'status.INTAKE': 'Kayıt',
+          'customerType.GUEST': 'Misafir',
+          'customerType.REGISTERED': 'Kayıtlı',
+          'common.unknown': 'Bilinmiyor'
         }
       }
     },

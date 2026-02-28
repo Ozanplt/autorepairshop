@@ -2,23 +2,42 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 
+function extractList(data: any): any[] {
+  if (Array.isArray(data)) return data
+  if (data?.content && Array.isArray(data.content)) return data.content
+  return []
+}
+
 function Vehicles() {
   const { t } = useTranslation()
   const [plate, setPlate] = useState('')
-  const [vehicles, setVehicles] = useState([])
+  const [vehicles, setVehicles] = useState<any[]>([])
+  const [customerMap, setCustomerMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    fetchCustomers()
     fetchVehicles()
   }, [])
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await apiClient.get('/v1/customers')
+      const list = extractList(response.data)
+      const map: Record<string, string> = {}
+      list.forEach((c: any) => { map[c.id] = c.fullName })
+      setCustomerMap(map)
+    } catch (error) {
+      console.error('Failed to fetch customers for lookup:', error)
+    }
+  }
 
   const fetchVehicles = async (searchPlate?: string) => {
     setLoading(true)
     try {
       const params = searchPlate ? { plate: searchPlate } : {}
       const response = await apiClient.get('/v1/vehicles', { params })
-      const data = response.data
-      setVehicles(Array.isArray(data) ? data : (data?.content || []))
+      setVehicles(extractList(response.data))
     } catch (error) {
       console.error('Failed to fetch vehicles:', error)
     } finally {
@@ -38,8 +57,8 @@ function Vehicles() {
           <input
             type="text"
             value={plate}
-            onChange={(e) => setPlate(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPlate(e.target.value)}
+            onKeyPress={(e: React.KeyboardEvent) => e.key === 'Enter' && handleSearch()}
             placeholder={t('vehicles.searchPlaceholder')}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-lg px-4 py-3"
           />
@@ -69,21 +88,21 @@ function Vehicles() {
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {vehicles.map((vehicle: any) => (
-                  <tr key={vehicle.id}>
+                  <tr key={vehicle.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                       {vehicle.rawPlate}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {vehicle.make}
+                      {vehicle.make || '-'}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {vehicle.model || 'N/A'}
+                      {vehicle.model || '-'}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {vehicle.year || 'N/A'}
+                      {vehicle.year || '-'}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {vehicle.customerName || 'N/A'}
+                      {customerMap[vehicle.customerId] || '-'}
                     </td>
                   </tr>
                 ))}
