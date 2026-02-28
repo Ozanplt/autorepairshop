@@ -18,9 +18,8 @@
       "webOrigins": ["http://localhost:5173", "http://localhost:3000"],
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
+      "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
-      "defaultClientScopes": ["openid", "profile", "email", "tenant-claims"],
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
@@ -64,10 +63,12 @@
     {
       "username": "owner@demo.com",
       "email": "owner@demo.com",
+      "firstName": "Owner",
+      "lastName": "Demo",
       "enabled": true,
       "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123"}],
-      "realmRoles": ["OWNER"],
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["OWNER", "default-roles-autorepairshop"],
       "attributes": {
         "tenant_id": ["00000000-0000-0000-0000-000000000001"],
         "branch_id": ["00000000-0000-0000-0000-000000000010"]
@@ -76,10 +77,12 @@
     {
       "username": "admin@demo.com",
       "email": "admin@demo.com",
+      "firstName": "Admin",
+      "lastName": "Demo",
       "enabled": true,
       "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123"}],
-      "realmRoles": ["ADMIN"],
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["ADMIN", "default-roles-autorepairshop"],
       "attributes": {
         "tenant_id": ["00000000-0000-0000-0000-000000000001"],
         "branch_id": ["00000000-0000-0000-0000-000000000010"]
@@ -88,10 +91,26 @@
     {
       "username": "mechanic@demo.com",
       "email": "mechanic@demo.com",
+      "firstName": "Mechanic",
+      "lastName": "Demo",
       "enabled": true,
       "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123"}],
-      "realmRoles": ["MECHANIC"],
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["MECHANIC", "default-roles-autorepairshop"],
+      "attributes": {
+        "tenant_id": ["00000000-0000-0000-0000-000000000001"],
+        "branch_id": ["00000000-0000-0000-0000-000000000010"]
+      }
+    },
+    {
+      "username": "staff@demo.com",
+      "email": "staff@demo.com",
+      "firstName": "Staff",
+      "lastName": "Demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["STAFF", "default-roles-autorepairshop"],
       "attributes": {
         "tenant_id": ["00000000-0000-0000-0000-000000000001"],
         "branch_id": ["00000000-0000-0000-0000-000000000010"]
@@ -100,10 +119,12 @@
     {
       "username": "owner2@demo.com",
       "email": "owner2@demo.com",
+      "firstName": "Owner2",
+      "lastName": "Demo",
       "enabled": true,
       "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123"}],
-      "realmRoles": ["OWNER"],
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["OWNER", "default-roles-autorepairshop"],
       "attributes": {
         "tenant_id": ["00000000-0000-0000-0000-000000000002"],
         "branch_id": ["00000000-0000-0000-0000-000000000020"]
@@ -112,10 +133,12 @@
     {
       "username": "admin2@demo.com",
       "email": "admin2@demo.com",
+      "firstName": "Admin2",
+      "lastName": "Demo",
       "enabled": true,
       "emailVerified": true,
-      "credentials": [{"type": "password", "value": "password123"}],
-      "realmRoles": ["ADMIN"],
+      "credentials": [{"type": "password", "value": "password123", "temporary": false}],
+      "realmRoles": ["ADMIN", "default-roles-autorepairshop"],
       "attributes": {
         "tenant_id": ["00000000-0000-0000-0000-000000000002"],
         "branch_id": ["00000000-0000-0000-0000-000000000020"]
@@ -124,142 +147,40 @@
   ],
   "clientScopes": [
     {
-      "name": "openid",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "false"
-      }
-    },
-    {
-      "name": "profile",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "true"
-      },
-      "protocolMappers": [
-        {
-          "name": "username",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "config": {
-            "user.attribute": "username",
-            "claim.name": "preferred_username",
-            "jsonType.label": "String",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        },
-        {
-          "name": "full name",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-full-name-mapper",
-          "config": {
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        }
-      ]
-    },
-    {
-      "name": "email",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "true"
-      },
-      "protocolMappers": [
-        {
-          "name": "email",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "config": {
-            "user.attribute": "email",
-            "claim.name": "email",
-            "jsonType.label": "String",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        },
-        {
-          "name": "email verified",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "config": {
-            "user.attribute": "emailVerified",
-            "claim.name": "email_verified",
-            "jsonType.label": "boolean",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        }
-      ]
-    },
-    {
-      "name": "roles",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "false"
-      },
-      "protocolMappers": [
-        {
-          "name": "realm roles",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-realm-role-mapper",
-          "config": {
-            "multivalued": "true",
-            "claim.name": "realm_access.roles",
-            "jsonType.label": "String",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        }
-      ]
-    },
-    {
-      "name": "web-origins",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "false"
-      },
-      "protocolMappers": [
-        {
-          "name": "allowed web origins",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-allowed-origins-mapper",
-          "config": {}
-        }
-      ]
-    },
-    {
       "name": "tenant-claims",
+      "description": "Custom tenant and branch claims for multi-tenancy",
       "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
       "protocolMappers": [
         {
           "name": "tenant_id",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
           "config": {
             "user.attribute": "tenant_id",
             "claim.name": "tenant_id",
             "jsonType.label": "String",
             "id.token.claim": "true",
-            "access.token.claim": "true"
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
           }
         },
         {
           "name": "branch_id",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
           "config": {
             "user.attribute": "branch_id",
             "claim.name": "branch_id",
             "jsonType.label": "String",
             "id.token.claim": "true",
-            "access.token.claim": "true"
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
           }
         }
       ]

@@ -28,5 +28,9 @@ public class CreateVehicleRequest {
 
     private String color;
 
+    private Integer mileage;
+
+    private String engineNo;
+
     private String notes;
 }

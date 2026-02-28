@@ -45,6 +45,8 @@ public class VehicleController {
         vehicle.setYear(request.getYear());
         vehicle.setVin(request.getVin());
         vehicle.setColor(request.getColor());
+        vehicle.setMileage(request.getMileage());
+        vehicle.setEngineNo(request.getEngineNo());
         vehicle.setNotes(request.getNotes());
         vehicle.setStatus("ACTIVE");
         vehicle.setCreatedAt(Instant.now());
@@ -86,6 +88,9 @@ public class VehicleController {
                 .year(v.getYear())
                 .vin(v.getVin())
                 .color(v.getColor())
+                .mileage(v.getMileage())
+                .engineNo(v.getEngineNo())
+                .notes(v.getNotes())
                 .status(v.getStatus())
                 .createdAt(v.getCreatedAt())
                 .build();

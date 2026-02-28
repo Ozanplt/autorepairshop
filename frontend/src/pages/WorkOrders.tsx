@@ -15,16 +15,30 @@ function WorkOrders() {
   const { t } = useTranslation()
   const auth = useAuth()
   const [workOrders, setWorkOrders] = useState<any[]>([])
+  const [customerMap, setCustomerMap] = useState<Record<string, string>>({})
+  const [vehicleMap, setVehicleMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchWorkOrders()
+    fetchAll()
   }, [])
 
-  const fetchWorkOrders = async () => {
+  const fetchAll = async () => {
     try {
-      const response = await apiClient.get('/v1/workorders')
-      setWorkOrders(extractList(response.data))
+      const [woRes, custRes, vehRes] = await Promise.all([
+        apiClient.get('/v1/workorders'),
+        apiClient.get('/v1/customers'),
+        apiClient.get('/v1/vehicles')
+      ])
+      setWorkOrders(extractList(woRes.data))
+
+      const cMap: Record<string, string> = {}
+      extractList(custRes.data).forEach((c: any) => { if (c.id) cMap[c.id] = c.fullName || '-' })
+      setCustomerMap(cMap)
+
+      const vMap: Record<string, string> = {}
+      extractList(vehRes.data).forEach((v: any) => { if (v.id) vMap[v.id] = v.rawPlate || v.normalizedPlate || '-' })
+      setVehicleMap(vMap)
     } catch (error) {
       console.error('Failed to fetch work orders:', error)
     } finally {
@@ -146,10 +160,10 @@ function WorkOrders() {
                           {wo.id.substring(0, 8)}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                          {wo.customerName || '-'}
+                          {wo.customerName || customerMap[wo.customerId] || '-'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 font-medium">
-                          {wo.vehiclePlate || '-'}
+                          {wo.vehiclePlate || vehicleMap[wo.vehicleId] || '-'}
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-500">
                           {renderProblem(wo.problemShortNote)}

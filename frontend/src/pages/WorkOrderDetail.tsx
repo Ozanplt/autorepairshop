@@ -3,11 +3,37 @@ import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiClient from '../api/client'
 
+function extractList(data: any): any[] {
+  if (Array.isArray(data)) return data
+  if (data?.content && Array.isArray(data.content)) return data.content
+  return []
+}
+
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  DRAFT: ['OPEN', 'CANCELED'],
+  OPEN: ['IN_PROGRESS', 'CANCELED'],
+  IN_PROGRESS: ['WAITING_CUSTOMER_APPROVAL', 'COMPLETED', 'CANCELED'],
+  WAITING_CUSTOMER_APPROVAL: ['IN_PROGRESS', 'COMPLETED', 'CANCELED'],
+  COMPLETED: [],
+  CANCELED: []
+}
+
+const STATUS_BUTTON_COLORS: Record<string, string> = {
+  OPEN: 'bg-blue-600 hover:bg-blue-700 text-white',
+  IN_PROGRESS: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+  WAITING_CUSTOMER_APPROVAL: 'bg-orange-500 hover:bg-orange-600 text-white',
+  COMPLETED: 'bg-green-600 hover:bg-green-700 text-white',
+  CANCELED: 'bg-red-600 hover:bg-red-700 text-white'
+}
+
 function WorkOrderDetail() {
   const { id } = useParams()
   const { t } = useTranslation()
   const [workOrder, setWorkOrder] = useState<any>(null)
+  const [customerName, setCustomerName] = useState('-')
+  const [vehiclePlate, setVehiclePlate] = useState('-')
   const [loading, setLoading] = useState(true)
+  const [statusLoading, setStatusLoading] = useState(false)
 
   useEffect(() => {
     fetchWorkOrder()
@@ -16,12 +42,48 @@ function WorkOrderDetail() {
   const fetchWorkOrder = async () => {
     try {
       const response = await apiClient.get(`/v1/workorders/${id}`)
-      setWorkOrder(response.data)
+      const wo = response.data
+      setWorkOrder(wo)
+
+      if (wo.customerId) {
+        try {
+          const custRes = await apiClient.get('/v1/customers')
+          const custs = extractList(custRes.data)
+          const cust = custs.find((c: any) => c.id === wo.customerId)
+          if (cust) setCustomerName(cust.fullName || '-')
+        } catch {}
+      }
+      if (wo.vehicleId) {
+        try {
+          const vehRes = await apiClient.get('/v1/vehicles')
+          const vehs = extractList(vehRes.data)
+          const veh = vehs.find((v: any) => v.id === wo.vehicleId)
+          if (veh) setVehiclePlate(veh.rawPlate || veh.normalizedPlate || '-')
+        } catch {}
+      }
     } catch (error) {
       console.error('Failed to fetch work order:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (statusLoading) return
+    setStatusLoading(true)
+    try {
+      const response = await apiClient.patch(`/v1/workorders/${id}/status`, { status: newStatus })
+      setWorkOrder(response.data)
+    } catch (error) {
+      console.error('Failed to update status:', error)
+    } finally {
+      setStatusLoading(false)
+    }
+  }
+
+  const getNextStatuses = (): string[] => {
+    if (!workOrder) return []
+    return VALID_TRANSITIONS[workOrder.status] || []
   }
 
   if (loading) {
@@ -32,16 +94,34 @@ function WorkOrderDetail() {
     return <div className="text-center py-8">{t('workOrderDetail.notFound')}</div>
   }
 
+  const nextStatuses = getNextStatuses()
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            {t('workOrderDetail.title')}
-          </h3>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            ID: {workOrder.id}
-          </p>
+        <div className="px-4 py-5 sm:px-6 flex justify-between items-start">
+          <div>
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              {t('workOrderDetail.title')}
+            </h3>
+            <p className="mt-1 max-w-2xl text-sm text-gray-500">
+              ID: {workOrder.id}
+            </p>
+          </div>
+          {nextStatuses.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {nextStatuses.map((status) => (
+                <button
+                  key={status}
+                  onClick={() => handleStatusChange(status)}
+                  disabled={statusLoading}
+                  className={`inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm ${STATUS_BUTTON_COLORS[status] || 'bg-gray-500 hover:bg-gray-600 text-white'} disabled:opacity-50`}
+                >
+                  {statusLoading ? '...' : t(`status.${status}`, status)}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
           <dl className="sm:divide-y sm:divide-gray-200">
@@ -54,6 +134,7 @@ function WorkOrderDetail() {
                   workOrder.status === 'IN_PROGRESS' ? 'bg-yellow-200 text-yellow-800' :
                   workOrder.status === 'COMPLETED' ? 'bg-green-200 text-green-800' :
                   workOrder.status === 'CANCELED' ? 'bg-red-200 text-red-800' :
+                  workOrder.status === 'WAITING_CUSTOMER_APPROVAL' ? 'bg-orange-200 text-orange-800' :
                   'bg-gray-200 text-gray-800'
                 }`}>
                   {t(`status.${workOrder.status}`, workOrder.status)}
@@ -63,13 +144,13 @@ function WorkOrderDetail() {
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrders.customer')}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {workOrder.customerName || '-'}
+                {workOrder.customerName || customerName}
               </dd>
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrders.vehicle')}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {workOrder.vehiclePlate || '-'}
+                {workOrder.vehiclePlate || vehiclePlate}
               </dd>
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -80,7 +161,7 @@ function WorkOrderDetail() {
             </div>
             <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">{t('workOrderDetail.details')}</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 whitespace-pre-wrap">
                 {workOrder.problemDetails || '-'}
               </dd>
             </div>

@@ -19,6 +19,9 @@ public class VehicleResponse {
     private Integer year;
     private String vin;
     private String color;
+    private Integer mileage;
+    private String engineNo;
+    private String notes;
     private String status;
     private Instant createdAt;
 }

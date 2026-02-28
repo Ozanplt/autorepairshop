@@ -1,23 +1,21 @@
-package com.autorepair.vehicle.entity;
+package com.autorepair.appointment.entity;
 
-import java.time.Instant;
-import java.util.UUID;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
+
 @Entity
-@Table(name = "vehicles")
+@Table(name = "appointments")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Vehicle {
+public class Appointment {
 
     @Id
     private UUID id;
@@ -31,36 +29,35 @@ public class Vehicle {
     @Column(name = "customer_id", nullable = false)
     private UUID customerId;
 
-    @Column(name = "raw_plate", nullable = false, length = 20)
-    private String rawPlate;
+    @Column(name = "vehicle_id")
+    private UUID vehicleId;
 
-    @Column(name = "normalized_plate", nullable = false, length = 20)
-    private String normalizedPlate;
+    @Column(name = "work_order_id")
+    private UUID workOrderId;
 
-    @Column(length = 100)
-    private String make;
-
-    @Column(length = 100)
-    private String model;
-
-    private Integer year;
-
-    @Column(length = 17)
-    private String vin;
-
-    @Column(length = 50)
-    private String color;
-
-    private Integer mileage;
-
-    @Column(name = "engine_no", length = 50)
-    private String engineNo;
+    @Column(nullable = false, length = 255)
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String notes;
+    private String description;
+
+    @Column(name = "appointment_date", nullable = false)
+    private LocalDate appointmentDate;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
+
+    @Column(name = "end_time")
+    private LocalTime endTime;
 
     @Column(nullable = false, length = 20)
     private String status;
+
+    @Column(name = "assigned_to_user_id")
+    private UUID assignedToUserId;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

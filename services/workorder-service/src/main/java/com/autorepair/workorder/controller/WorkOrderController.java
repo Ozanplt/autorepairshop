@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -36,5 +37,16 @@ public class WorkOrderController {
     @GetMapping("/{id}")
     public ResponseEntity<WorkOrderResponse> getWorkOrder(@PathVariable UUID id) {
         return ResponseEntity.ok(workOrderService.getWorkOrder(id));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<WorkOrderResponse> updateStatus(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> body) {
+        String newStatus = body.get("status");
+        if (newStatus == null || newStatus.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(workOrderService.updateStatus(id, newStatus));
     }
 }

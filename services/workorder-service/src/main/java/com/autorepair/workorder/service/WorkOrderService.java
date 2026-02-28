@@ -88,6 +88,49 @@ public class WorkOrderService {
                 .build());
     }
 
+    private static final java.util.Map<String, java.util.Set<String>> VALID_TRANSITIONS = java.util.Map.of(
+            "DRAFT", java.util.Set.of("OPEN", "CANCELED"),
+            "OPEN", java.util.Set.of("IN_PROGRESS", "CANCELED"),
+            "IN_PROGRESS", java.util.Set.of("WAITING_CUSTOMER_APPROVAL", "COMPLETED", "CANCELED"),
+            "WAITING_CUSTOMER_APPROVAL", java.util.Set.of("IN_PROGRESS", "COMPLETED", "CANCELED"),
+            "COMPLETED", java.util.Set.of(),
+            "CANCELED", java.util.Set.of()
+    );
+
+    @Transactional
+    public WorkOrderResponse updateStatus(UUID id, String newStatus) {
+        UUID tenantId = TenantContext.getTenantId();
+        WorkOrder wo = workOrderRepository.findByIdAndIsDeletedFalse(id)
+                .filter(w -> tenantId == null || w.getTenantId().equals(tenantId))
+                .orElseThrow(() -> new RuntimeException("Work order not found"));
+
+        String currentStatus = wo.getStatus();
+        java.util.Set<String> allowed = VALID_TRANSITIONS.getOrDefault(currentStatus, java.util.Set.of());
+        if (!allowed.contains(newStatus)) {
+            throw new IllegalStateException("Cannot transition from " + currentStatus + " to " + newStatus);
+        }
+
+        wo.setStatus(newStatus);
+        wo.setUpdatedAt(Instant.now());
+        if ("COMPLETED".equals(newStatus)) {
+            wo.setCompletedAt(Instant.now());
+        }
+        workOrderRepository.save(wo);
+
+        return WorkOrderResponse.builder()
+                .id(wo.getId())
+                .tenantId(wo.getTenantId())
+                .customerId(wo.getCustomerId())
+                .vehicleId(wo.getVehicleId())
+                .status(wo.getStatus())
+                .subStatus(wo.getSubStatus())
+                .problemShortNote(wo.getProblemShortNote())
+                .problemDetails(wo.getProblemDetails())
+                .createdAt(wo.getCreatedAt())
+                .updatedAt(wo.getUpdatedAt())
+                .build();
+    }
+
     @Transactional(readOnly = true)
     public WorkOrderResponse getWorkOrder(UUID id) {
         UUID tenantId = TenantContext.getTenantId();

@@ -34,6 +34,9 @@ function FastIntake() {
     make: '',
     model: '',
     year: '',
+    mileage: '',
+    color: '',
+    vin: '',
     problem: '',
     problemDetails: ''
   })
@@ -109,6 +112,13 @@ function FastIntake() {
       }
     }
 
+    if (formData.mileage) {
+      const km = parseInt(formData.mileage, 10)
+      if (isNaN(km) || km < 0 || km > 9999999) {
+        errs.mileage = t('validation.mileageInvalid')
+      }
+    }
+
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -156,7 +166,10 @@ function FastIntake() {
         rawPlate: formData.licensePlate.trim(),
         make: formData.make.trim(),
         model: formData.model.trim() || undefined,
-        year: formData.year ? parseInt(formData.year, 10) : undefined
+        year: formData.year ? parseInt(formData.year, 10) : undefined,
+        mileage: formData.mileage ? parseInt(formData.mileage, 10) : undefined,
+        color: formData.color.trim() || undefined,
+        vin: formData.vin.trim() || undefined
       }, {
         headers: { 'Idempotency-Key': crypto.randomUUID() }
       })
@@ -186,7 +199,7 @@ function FastIntake() {
       })
 
       showToast('success', t('fastIntake.success'))
-      setFormData({ licensePlate: '', customerName: '', phone: '', email: '', make: '', model: '', year: '', problem: '', problemDetails: '' })
+      setFormData({ licensePlate: '', customerName: '', phone: '', email: '', make: '', model: '', year: '', mileage: '', color: '', vin: '', problem: '', problemDetails: '' })
       setErrors({})
       setSelectedParts({ maintenance: [], issues: [], replacements: [] })
       navigate('/workorders')
@@ -346,6 +359,50 @@ function FastIntake() {
                 placeholder="ornek@email.com"
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.mileage')}
+              </label>
+              <input
+                type="number"
+                value={formData.mileage}
+                onChange={(e) => { setFormData({...formData, mileage: e.target.value.replace(/[^0-9]/g, '')}); setErrors({...errors, mileage: ''}) }}
+                className={inputClass('mileage')}
+                placeholder="85000"
+                min="0"
+              />
+              {errors.mileage && <p className="mt-1 text-sm text-red-600">{errors.mileage}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.color')}
+              </label>
+              <input
+                type="text"
+                value={formData.color}
+                onChange={(e) => setFormData({...formData, color: e.target.value})}
+                className={inputClass('color')}
+                placeholder={t('fastIntake.colorPlaceholder')}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('fastIntake.vin')}
+              </label>
+              <input
+                type="text"
+                value={formData.vin}
+                onChange={(e) => setFormData({...formData, vin: e.target.value.toUpperCase().slice(0, 17)})}
+                className={inputClass('vin')}
+                placeholder="WVWZZZ3CZWE123456"
+                maxLength={17}
+              />
             </div>
           </div>
 

@@ -13,6 +13,7 @@ import Vehicles from './pages/Vehicles'
 import Invoices from './pages/Invoices'
 import InvoiceDetail from './pages/InvoiceDetail'
 import Admin from './pages/Admin'
+import Appointments from './pages/Appointments'
 import Layout from './components/Layout'
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/vehicles" element={<Vehicles />} />
+        <Route path="/appointments" element={<Appointments />} />
         <Route path="/invoices" element={canAccessInvoices(auth.user) ? <Invoices /> : <Navigate to="/fast-intake" replace />} />
         <Route path="/invoices/:id" element={canAccessInvoices(auth.user) ? <InvoiceDetail /> : <Navigate to="/fast-intake" replace />} />
         <Route path="/admin" element={canAccessAdmin(auth.user) ? <Admin /> : <Navigate to="/fast-intake" replace />} />

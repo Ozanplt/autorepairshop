@@ -47,6 +47,9 @@ function Layout({ children }: LayoutProps) {
                 <Link to="/vehicles" className={navLinkClass}>
                   {t('vehicles.title')}
                 </Link>
+                <Link to="/appointments" className={navLinkClass}>
+                  {t('appointments.title')}
+                </Link>
                 {canAccessInvoices(auth.user) && (
                   <Link to="/invoices" className={navLinkClass}>
                     {t('invoices.title')}
