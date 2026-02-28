@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -37,6 +38,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String branchId = jwt.getClaimAsString("branch_id");
             if (branchId != null) {
                 context.setBranchId(UUID.fromString(branchId));
+            }
+
+            List<String> roles = jwt.getClaimAsStringList("roles");
+            if (roles != null) {
+                context.setRoles(roles.toArray(new String[0]));
+            }
+
+            List<String> permissions = jwt.getClaimAsStringList("permissions");
+            if (permissions != null) {
+                context.setPermissions(permissions.toArray(new String[0]));
             }
             
             TenantContext.set(context);

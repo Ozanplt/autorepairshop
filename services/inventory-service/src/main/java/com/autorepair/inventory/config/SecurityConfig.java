@@ -1,4 +1,4 @@
-package com.autorepair.customer.config;
+package com.autorepair.inventory.config;
 
 import com.autorepair.common.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
