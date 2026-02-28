@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from 'react-oidc-context'
 import App from './App'
+import { ToastProvider } from './components/Toast'
 import './i18n'
 import './index.css'
 
@@ -21,7 +22,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider {...oidcConfig}>
       <BrowserRouter>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </BrowserRouter>
     </AuthProvider>
   </React.StrictMode>

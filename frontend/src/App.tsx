@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { setAccessToken } from './api/client'
+import { canAccessAdmin, canAccessInvoices } from './auth/roles'
 import Login from './pages/Login'
 import FastIntake from './pages/FastIntake'
 import WorkOrders from './pages/WorkOrders'
@@ -47,9 +48,9 @@ function App() {
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/vehicles" element={<Vehicles />} />
-        <Route path="/invoices" element={<Invoices />} />
-        <Route path="/invoices/:id" element={<InvoiceDetail />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/invoices" element={canAccessInvoices(auth.user) ? <Invoices /> : <Navigate to="/fast-intake" replace />} />
+        <Route path="/invoices/:id" element={canAccessInvoices(auth.user) ? <InvoiceDetail /> : <Navigate to="/fast-intake" replace />} />
+        <Route path="/admin" element={canAccessAdmin(auth.user) ? <Admin /> : <Navigate to="/fast-intake" replace />} />
       </Routes>
     </Layout>
   )

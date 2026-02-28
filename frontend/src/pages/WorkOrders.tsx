@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from 'react-oidc-context'
 import apiClient from '../api/client'
+import { canCreateWorkOrder } from '../auth/roles'
 
 function WorkOrders() {
   const { t } = useTranslation()
+  const auth = useAuth()
   const [workOrders, setWorkOrders] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -44,14 +47,16 @@ function WorkOrders() {
         <div className="sm:flex-auto">
           <h1 className="text-2xl font-semibold text-gray-900">{t('workOrders.title')}</h1>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <Link
-            to="/fast-intake"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-          >
-            {t('workOrders.createNew')}
-          </Link>
-        </div>
+        {canCreateWorkOrder(auth.user) && (
+          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <Link
+              to="/fast-intake"
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+            >
+              {t('workOrders.createNew')}
+            </Link>
+          </div>
+        )}
       </div>
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">

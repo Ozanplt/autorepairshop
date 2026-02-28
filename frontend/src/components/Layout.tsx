@@ -1,6 +1,7 @@
 import { useAuth } from 'react-oidc-context'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { canAccessAdmin, canAccessInvoices, getUserRoles } from '../auth/roles'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -11,6 +12,9 @@ function Layout({ children }: LayoutProps) {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
 
+  const userRoles = getUserRoles(auth.user)
+  const primaryRole = userRoles[0] || 'USER'
+
   const handleLogout = () => {
     auth.signoutRedirect()
   }
@@ -18,6 +22,8 @@ function Layout({ children }: LayoutProps) {
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === 'en' ? 'tr' : 'en')
   }
+
+  const navLinkClass = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -29,42 +35,28 @@ function Layout({ children }: LayoutProps) {
                 <h1 className="text-xl font-bold text-blue-600">AutoRepairShop</h1>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link
-                  to="/fast-intake"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
+                <Link to="/fast-intake" className={navLinkClass}>
                   {t('fastIntake.title')}
                 </Link>
-                <Link
-                  to="/workorders"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
+                <Link to="/workorders" className={navLinkClass}>
                   {t('workOrders.title')}
                 </Link>
-                <Link
-                  to="/customers"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
+                <Link to="/customers" className={navLinkClass}>
                   {t('customers.title')}
                 </Link>
-                <Link
-                  to="/vehicles"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
+                <Link to="/vehicles" className={navLinkClass}>
                   {t('vehicles.title')}
                 </Link>
-                <Link
-                  to="/invoices"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  {t('invoices.title')}
-                </Link>
-                <Link
-                  to="/admin"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  {t('admin.title')}
-                </Link>
+                {canAccessInvoices(auth.user) && (
+                  <Link to="/invoices" className={navLinkClass}>
+                    {t('invoices.title')}
+                  </Link>
+                )}
+                {canAccessAdmin(auth.user) && (
+                  <Link to="/admin" className={navLinkClass}>
+                    {t('admin.title')}
+                  </Link>
+                )}
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -74,9 +66,14 @@ function Layout({ children }: LayoutProps) {
               >
                 {i18n.language === 'en' ? 'TR' : 'EN'}
               </button>
-              <span className="text-sm text-gray-700">
-                {auth.user?.profile?.email}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                  {primaryRole}
+                </span>
+                <span className="text-sm text-gray-700">
+                  {auth.user?.profile?.email}
+                </span>
+              </div>
               <button
                 onClick={handleLogout}
                 className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"
